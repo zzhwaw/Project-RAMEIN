@@ -132,3 +132,124 @@ body {
     padding: 10px 60px;
   }
 }
+/* --- ROOM SELECTION PAGE (PINK & BIRU) --- */
+.room-select-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  z-index: 20;
+  pointer-events: none; /* Mencegah klik saat animasi belum aktif */
+}
+
+.room-select-container.active {
+  pointer-events: auto;
+}
+
+/* Panel Kiri (Pink) & Kanan (Biru) */
+.panel {
+  flex: 1;
+  height: 100%;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  transition: transform 0.6s cubic-bezier(0.77, 0, 0.175, 1);
+}
+
+.panel-pink {
+  background-color: #FF70D9;
+  transform: translateX(-100%); /* Sembunyi ke kiri */
+}
+
+.panel-blue {
+  background-color: #1CA3FF;
+  transform: translateX(100%); /* Sembunyi ke kanan */
+}
+
+/* Kelas saat tirai MENTUTUP ke tengah */
+.room-select-container.active .panel-pink {
+  transform: translateX(0);
+}
+
+.room-select-container.active .panel-blue {
+  transform: translateX(0);
+}
+
+/* Tombol BUAT & GABUNG */
+.btn-room {
+  background-color: #FFC700;
+  color: #FFFFFF;
+  font-size: 2rem;
+  font-weight: 900;
+  padding: 14px 60px;
+  border: none;
+  border-radius: 35px;
+  cursor: pointer;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.15);
+  letter-spacing: 2px;
+  text-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s ease;
+  z-index: 30;
+}
+
+.btn-room:hover {
+  transform: scale(1.08);
+  background-color: #FFD428;
+}
+
+.btn-room:active {
+  transform: scale(0.95);
+}
+
+/* Tombol Back (<) di Pojok Kiri Bawah */
+.btn-back {
+  position: absolute;
+  bottom: 30px;
+  left: 30px;
+  width: 60px;
+  height: 60px;
+  background-color: #FFC700;
+  color: #FFFFFF;
+  font-size: 2rem;
+  font-weight: 900;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.2);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 40;
+  transition: transform 0.2s ease;
+  padding-right: 4px; /* Supaya panah pas di tengah */
+}
+
+.btn-back:hover {
+  transform: scale(1.1);
+  background-color: #FFD428;
+}
+
+.btn-back:active {
+  transform: scale(0.9);
+}
+
+/* Penyesuaian Blob Khusus di Panel Pink & Biru */
+.blob-pink-1 { top: 5%; left: 5%; width: 140px; height: 110px; background-color: #FFB326; }
+.blob-pink-2 { top: 8%; left: 45%; width: 60px; height: 60px; background-color: #92EA62; }
+.blob-pink-3 { top: 12%; right: 5%; width: 110px; height: 130px; background-color: #4A3A54; }
+.blob-pink-4 { bottom: 35%; left: 10%; width: 120px; height: 150px; background-color: #00B2FF; }
+.blob-pink-5 { bottom: 32%; right: 15%; width: 90px; height: 120px; background-color: #FFC700; }
+.blob-pink-6 { bottom: 12%; left: 8%; width: 80px; height: 100px; background-color: #92EA62; }
+.blob-pink-7 { bottom: 8%; right: 20%; width: 140px; height: 160px; background-color: #FF5277; }
+
+.blob-blue-1 { top: -2%; left: 15%; width: 120px; height: 100px; background-color: #2D4356; }
+.blob-blue-2 { top: -5%; right: -5%; width: 160px; height: 140px; background-color: #FF7BE5; }
+.blob-blue-3 { top: 10%; left: 12%; width: 150px; height: 130px; background-color: #AB6B7B; }
+.blob-blue-4 { top: 12%; right: 15%; width: 200px; height: 230px; background-color: #C1E12D; }
+.blob-blue-5 { bottom: 30%; left: 8%; width: 130px; height: 80px; background-color: #A370DB; }
+.blob-blue-6 { bottom: 20%; right: -5%; width: 160px; height: 200px; background-color: #B56565; }
+.blob-blue-7 { bottom: -8%; left: 10%; width: 180px; height: 100px; background-color: #62EAAB; }
