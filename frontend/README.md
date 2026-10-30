@@ -1,5 +1,18 @@
 # React + Vite
 
+## Running the room lobby
+
+Start the Socket.IO room server and the frontend in separate terminals:
+
+```sh
+npm --prefix backend start
+npm --prefix frontend run dev
+```
+
+The room server listens on port `3001` by default. Set `VITE_SOCKET_URL` in the
+frontend environment to change its URL, and set `CLIENT_ORIGIN` in the backend
+environment to a comma-separated list of allowed frontend origins when needed.
+
 This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
 
 Currently, two official plugins are available:

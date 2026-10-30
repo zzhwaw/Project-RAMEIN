@@ -2,18 +2,27 @@ import { useState } from 'react';
 
 const slimeColors = ['blue', 'green', 'yellow', 'pink', 'red', 'dark'];
 
-export default function JoinRoomPage({ onBack }) {
+export default function JoinRoomPage({ onBack, onJoinRoom }) {
   const [roomCode, setRoomCode] = useState('');
-  const [submittedCode, setSubmittedCode] = useState('');
+  const [playerName, setPlayerName] = useState('');
+  const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    setSubmittedCode(roomCode.trim().toUpperCase());
+    setError('');
+    setIsSubmitting(true);
+    const result = await onJoinRoom({
+      roomId: roomCode.trim().toUpperCase(),
+      playerName,
+    });
+    if (result.error) setError(result.error);
+    setIsSubmitting(false);
   };
 
   const handleCodeChange = (event) => {
     setRoomCode(event.target.value.replace(/[^a-zA-Z0-9]/g, '').slice(0, 6).toUpperCase());
-    setSubmittedCode('');
+    setError('');
   };
 
   return (
@@ -53,15 +62,25 @@ export default function JoinRoomPage({ onBack }) {
               maxLength={6}
               value={roomCode}
               onChange={handleCodeChange}
-              aria-describedby={submittedCode ? 'join-room-status' : undefined}
+              aria-describedby={error ? 'join-room-status' : undefined}
               required
             />
-            <button className="join-room-submit" type="submit">GABUNG ROOM</button>
-            {submittedCode && (
-              <p className="join-room-status" id="join-room-status" role="status">
-                Kode {submittedCode} siap digunakan. Koneksi room belum tersedia.
-              </p>
-            )}
+            <label htmlFor="join-player-name">Nama pemain</label>
+            <input
+              id="join-player-name"
+              name="playerName"
+              type="text"
+              placeholder="Nama kamu"
+              autoComplete="nickname"
+              maxLength={24}
+              value={playerName}
+              onChange={(event) => setPlayerName(event.target.value)}
+              required
+            />
+            {error && <p className="room-form-error" id="join-room-status" role="alert">{error}</p>}
+            <button className="join-room-submit" type="submit" disabled={isSubmitting}>
+              {isSubmitting ? 'GABUNG...' : 'GABUNG & MASUK LOBBY'}
+            </button>
           </form>
         </section>
       </div>
