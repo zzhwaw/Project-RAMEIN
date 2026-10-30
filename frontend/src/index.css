@@ -253,3 +253,279 @@ body {
 .blob-blue-5 { bottom: 30%; left: 8%; width: 130px; height: 80px; background-color: #A370DB; }
 .blob-blue-6 { bottom: 20%; right: -5%; width: 160px; height: 200px; background-color: #B56565; }
 .blob-blue-7 { bottom: -8%; left: 10%; width: 180px; height: 100px; background-color: #62EAAB; }
+
+.app-shell {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.room-select-container.creating .panel-pink {
+  position: absolute;
+  z-index: 2;
+  left: 0;
+  width: 50%;
+  animation: room-create-sweep 700ms cubic-bezier(0.77, 0, 0.175, 1) forwards;
+}
+
+.room-select-container.creating .panel-blue {
+  transform: translateX(100%);
+  transition: transform 700ms cubic-bezier(0.77, 0, 0.175, 1);
+}
+
+@keyframes room-create-sweep {
+  0% { width: 50%; transform: translateX(0); }
+  42% { width: 100%; transform: translateX(0); }
+  100% { width: 100%; transform: translateX(100%); }
+}
+
+.create-room-page {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  overflow: auto;
+  background:
+    radial-gradient(ellipse at 12% 18%, rgba(255, 123, 229, 0.2), transparent 30%),
+    radial-gradient(ellipse at 88% 82%, rgba(0, 178, 255, 0.16), transparent 30%),
+    #fdfbf0;
+  animation: create-page-enter 500ms ease-out both;
+}
+
+.create-room-content {
+  min-height: 100%;
+  padding: 48px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 22px;
+}
+
+.create-back-button {
+  position: absolute;
+  top: 24px;
+  left: 24px;
+  z-index: 2;
+  width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  padding-right: 3px;
+  border: 0;
+  border-radius: 50%;
+  color: #fff;
+  background: #ffc700;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.16);
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: transform 180ms ease;
+}
+
+.create-back-button:hover { transform: scale(1.08); }
+.create-back-button:focus-visible,
+.create-room-form input:focus-visible,
+.create-room-form select:focus-visible,
+.create-room-submit:focus-visible {
+  outline: 3px solid #2b2b2b;
+  outline-offset: 3px;
+}
+
+.slime-line {
+  width: min(100%, 560px);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: clamp(8px, 2.5vw, 22px);
+  padding: 12px 0 4px;
+}
+
+.slime {
+  --slime-color: #ff2a2a;
+  position: relative;
+  flex: 0 1 66px;
+  width: 66px;
+  height: 60px;
+  min-width: 34px;
+  border-radius: 48% 52% 42% 42% / 65% 65% 35% 35%;
+  background: var(--slime-color);
+  box-shadow: inset -7px -8px 0 rgba(0, 0, 0, 0.12), 0 7px 12px rgba(43, 43, 43, 0.14);
+  animation: slime-bounce 1.45s ease-in-out infinite;
+  animation-delay: calc(var(--slime-index) * 110ms);
+}
+
+.slime::before,
+.slime::after {
+  position: absolute;
+  bottom: 1px;
+  width: 31%;
+  height: 19px;
+  content: '';
+  background: var(--slime-color);
+}
+
+.slime::before {
+  left: -7px;
+  border-radius: 90% 15% 50% 40%;
+  transform: rotate(12deg);
+}
+
+.slime::after {
+  right: -7px;
+  border-radius: 15% 90% 40% 50%;
+  transform: rotate(-12deg);
+}
+
+.slime-red { --slime-color: #ff2a2a; }
+.slime-blue { --slime-color: #00b2ff; }
+.slime-green { --slime-color: #00d936; }
+.slime-yellow { --slime-color: #ffc700; }
+.slime-pink { --slime-color: #ff70d9; }
+.slime-dark { --slime-color: #2b2b2b; }
+
+.slime-eye {
+  position: absolute;
+  top: 25px;
+  z-index: 1;
+  width: 6px;
+  height: 8px;
+  border-radius: 50%;
+  background: #292929;
+}
+
+.slime-eye-left { left: 36%; }
+.slime-eye-right { right: 36%; }
+
+.slime-mouth {
+  position: absolute;
+  top: 36px;
+  left: 50%;
+  width: 8px;
+  height: 4px;
+  border-bottom: 2px solid #292929;
+  border-radius: 50%;
+  transform: translateX(-50%);
+}
+
+.create-room-card {
+  width: min(100%, 440px);
+  padding: 32px;
+  border: 3px solid rgba(43, 43, 43, 0.08);
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 18px 48px rgba(43, 43, 43, 0.12);
+  text-align: center;
+}
+
+.create-room-eyebrow {
+  margin-bottom: 6px;
+  color: #ff70d9;
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 2px;
+}
+
+.create-room-card h1 {
+  color: #2b2b2b;
+  font-size: clamp(2rem, 7vw, 2.7rem);
+  font-weight: 900;
+}
+
+.create-room-description {
+  margin: 8px 0 24px;
+  color: #6b6870;
+  font-size: 1rem;
+}
+
+.create-room-form {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+.create-room-form label {
+  margin: 0 0 8px;
+  color: #2b2b2b;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.create-room-form input,
+.create-room-form select {
+  width: 100%;
+  min-height: 50px;
+  margin-bottom: 18px;
+  padding: 0 14px;
+  border: 2px solid #eee8f0;
+  border-radius: 14px;
+  background: #fff;
+  color: #2b2b2b;
+  font-size: 1rem;
+}
+
+.create-room-form input::placeholder { color: #aaa4ad; }
+
+.create-room-submit {
+  min-height: 54px;
+  margin-top: 6px;
+  border: 0;
+  border-radius: 18px;
+  background: #ffc700;
+  color: #fff;
+  box-shadow: 0 7px 14px rgba(0, 0, 0, 0.13);
+  font-size: 1.1rem;
+  font-weight: 900;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: transform 180ms ease, background-color 180ms ease;
+}
+
+.create-room-submit:hover {
+  transform: translateY(-2px);
+  background: #ffd428;
+}
+
+.room-created {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  color: #6b6870;
+}
+
+.room-created strong {
+  color: #2b2b2b;
+  font-size: 2.6rem;
+  letter-spacing: 8px;
+}
+
+.room-created p { margin-bottom: 12px; }
+.room-created .create-room-submit { width: 100%; }
+
+@keyframes slime-bounce {
+  0%, 100% { transform: translateY(0) scale(1, 1); }
+  45% { transform: translateY(-14px) scale(0.96, 1.04); }
+  70% { transform: translateY(0) scale(1.06, 0.94); }
+}
+
+@keyframes create-page-enter {
+  from { opacity: 0; transform: translateX(24px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@media (max-width: 520px) {
+  .create-room-content { padding: 78px 18px 28px; gap: 16px; }
+  .create-room-card { padding: 26px 20px; }
+  .slime { height: 48px; }
+  .slime-eye { top: 20px; }
+  .slime-mouth { top: 29px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
