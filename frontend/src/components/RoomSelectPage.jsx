@@ -1,6 +1,6 @@
-export default function RoomSelectPage({ isOpen, isCreating, onBack, onCreateRoom, onJoinRoom }) {
+export default function RoomSelectPage({ isOpen, isCreating, isJoining, onBack, onCreateRoom, onJoinRoom }) {
   return (
-    <div className={`room-select-container ${isOpen ? 'active' : ''} ${isCreating ? 'creating' : ''}`}>
+    <div className={`room-select-container ${isOpen ? 'active' : ''} ${isCreating ? 'creating' : ''} ${isJoining ? 'joining' : ''}`}>
       {/* Panel Kiri - PINK (BUAT ROOM) */}
       <div className="panel panel-pink">
         <div className="bg-blobs">
@@ -35,8 +35,8 @@ export default function RoomSelectPage({ isOpen, isCreating, onBack, onCreateRoo
           <div className="blob blob-blue-7"></div>
         </div>
 
-        <button className="btn-room" onClick={onJoinRoom}>
-          GABUNG
+        <button className="btn-room" onClick={onJoinRoom} disabled={isJoining}>
+          GABUNG ROOM
         </button>
       </div>
     </div>
