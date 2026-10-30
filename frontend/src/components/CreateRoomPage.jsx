@@ -2,15 +2,24 @@ import { useState } from 'react';
 
 const slimeColors = ['red', 'blue', 'green', 'yellow', 'pink', 'dark'];
 
-export default function CreateRoomPage({ onBack }) {
+export default function CreateRoomPage({ onBack, onCreateRoom }) {
   const [roomName, setRoomName] = useState('');
-  const [playerCount, setPlayerCount] = useState('4');
-  const [roomCode, setRoomCode] = useState('');
+  const [playerName, setPlayerName] = useState('');
+  const [capacity, setCapacity] = useState('6');
+  const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    const code = Math.random().toString(36).slice(2, 8).toUpperCase();
-    setRoomCode(code);
+    setError('');
+    setIsSubmitting(true);
+    const result = await onCreateRoom({
+      roomName,
+      playerName,
+      capacity: Number(capacity),
+    });
+    if (result.error) setError(result.error);
+    setIsSubmitting(false);
   };
 
   return (
@@ -35,43 +44,49 @@ export default function CreateRoomPage({ onBack }) {
           <h1>Buat Room</h1>
           <p className="create-room-description">Siapkan room serumu dan ajak teman-teman main.</p>
 
-          {roomCode ? (
-            <div className="room-created" role="status">
-              <span>Room kamu siap!</span>
-              <strong>{roomCode}</strong>
-              <p>Bagikan kode ini ke teman-temanmu.</p>
-              <button className="create-room-submit" onClick={onBack}>SELESAI</button>
-            </div>
-          ) : (
-            <form className="create-room-form" onSubmit={handleSubmit}>
-              <label htmlFor="room-name">Nama room</label>
-              <input
-                id="room-name"
-                name="roomName"
-                type="text"
-                placeholder="Contoh: Geng paling rame"
-                maxLength={30}
-                value={roomName}
-                onChange={(event) => setRoomName(event.target.value)}
-                required
-              />
+          <form className="create-room-form" onSubmit={handleSubmit}>
+            <label htmlFor="room-name">Nama room</label>
+            <input
+              id="room-name"
+              name="roomName"
+              type="text"
+              placeholder="Contoh: Geng paling rame"
+              maxLength={30}
+              value={roomName}
+              onChange={(event) => setRoomName(event.target.value)}
+              required
+            />
 
-              <label htmlFor="player-count">Jumlah pemain</label>
-              <select
-                id="player-count"
-                name="playerCount"
-                value={playerCount}
-                onChange={(event) => setPlayerCount(event.target.value)}
-              >
-                <option value="2">2 pemain</option>
-                <option value="4">4 pemain</option>
-                <option value="6">6 pemain</option>
-                <option value="8">8 pemain</option>
-              </select>
+            <label htmlFor="player-name">Nama pemain</label>
+            <input
+              id="player-name"
+              name="playerName"
+              type="text"
+              placeholder="Nama kamu"
+              maxLength={24}
+              value={playerName}
+              onChange={(event) => setPlayerName(event.target.value)}
+              required
+            />
 
-              <button className="create-room-submit" type="submit">BUAT ROOM</button>
-            </form>
-          )}
+            <label htmlFor="player-count">Kapasitas pemain</label>
+            <select
+              id="player-count"
+              name="capacity"
+              value={capacity}
+              onChange={(event) => setCapacity(event.target.value)}
+            >
+              <option value="3">3 pemain</option>
+              <option value="4">4 pemain</option>
+              <option value="5">5 pemain</option>
+              <option value="6">6 pemain</option>
+            </select>
+
+            {error && <p className="room-form-error" role="alert">{error}</p>}
+            <button className="create-room-submit" type="submit" disabled={isSubmitting}>
+              {isSubmitting ? 'MEMBUAT ROOM...' : 'BUAT ROOM & MASUK LOBBY'}
+            </button>
+          </form>
         </section>
       </div>
     </main>
