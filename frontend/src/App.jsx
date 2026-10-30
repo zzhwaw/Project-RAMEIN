@@ -1,40 +1,42 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import LandingPage from './components/LandingPage';
 import RoomSelectPage from './components/RoomSelectPage';
+import CreateRoomPage from './components/CreateRoomPage';
 
 export default function App() {
-  const [isRoomSelectOpen, setIsRoomSelectOpen] = useState(false);
+  const [page, setPage] = useState('landing');
+  const [isCreatingRoom, setIsCreatingRoom] = useState(false);
+  const createRoomTimeout = useRef(null);
 
-  // Fungsi saat tombol MAIN di klik (Tirai Menutup Ke Tengah)
-  const handleStart = () => {
-    setIsRoomSelectOpen(true);
-  };
-
-  // Fungsi saat tombol Back (<) di klik (Tirai Terbuka Kembali)
-  const handleBackToHome = () => {
-    setIsRoomSelectOpen(false);
-  };
+  useEffect(() => () => window.clearTimeout(createRoomTimeout.current), []);
 
   const handleCreateRoom = () => {
-    alert('Aksi: Buat Room dipilih!');
-  };
+    if (isCreatingRoom) return;
 
-  const handleJoinRoom = () => {
-    alert('Aksi: Gabung Room dipilih!');
+    setIsCreatingRoom(true);
+    createRoomTimeout.current = window.setTimeout(() => {
+      setPage('create');
+      setIsCreatingRoom(false);
+    }, 700);
   };
 
   return (
-    <div style={{ position: 'relative', width: '100vw', height: '100vh', overflow: 'hidden' }}>
-      {/* Layer 1: Homepage */}
-      <LandingPage onStart={handleStart} />
-
-      {/* Layer 2: Room Selection (Animasi Tirai Pink & Biru) */}
-      <RoomSelectPage 
-        isOpen={isRoomSelectOpen} 
-        onBack={handleBackToHome}
-        onCreateRoom={handleCreateRoom}
-        onJoinRoom={handleJoinRoom}
-      />
+    <div className="app-shell">
+      {page !== 'create' && (
+        <LandingPage onStart={() => setPage('select')} />
+      )}
+      {(page !== 'create' || isCreatingRoom) && (
+        <RoomSelectPage
+          isOpen={page === 'select' || isCreatingRoom}
+          isCreating={isCreatingRoom}
+          onBack={() => setPage('landing')}
+          onCreateRoom={handleCreateRoom}
+          onJoinRoom={() => alert('Fitur gabung room akan segera hadir!')}
+        />
+      )}
+      {(page === 'create' || isCreatingRoom) && (
+        <CreateRoomPage onBack={() => setPage('select')} />
+      )}
     </div>
   );
 }
