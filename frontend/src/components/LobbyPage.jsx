@@ -2,18 +2,46 @@ import { useState } from 'react';
 
 const cardColors = ['card-pink', 'card-blue', 'card-yellow', 'card-red', 'card-green', 'card-black'];
 
-export default function LobbyPage({ room, roomCode, players = [], onBack, onLeave, className = '' }) {
+export default function LobbyPage({
+  room,
+  roomCode,
+  players = [],
+  currentPlayerId,
+  onBack,
+  onLeave,
+  onSetReady,
+  onStartGame,
+  className = '',
+}) {
   const [message, setMessage] = useState('');
+  const [isUpdatingReady, setIsUpdatingReady] = useState(false);
+  const [isStartingGame, setIsStartingGame] = useState(false);
   const [copyMessage, setCopyMessage] = useState('');
   const roomPlayers = room?.players || players;
   const minimumPlayers = room?.minPlayers || 3;
   const displayedRoomCode = room?.id || roomCode || '------';
-  const isReady = roomPlayers.length >= minimumPlayers;
+  const currentPlayer = roomPlayers.find((player) => player.id === currentPlayerId);
+  const isHost = currentPlayer?.isHost || room?.hostId === currentPlayerId;
+  const readyPlayersCount = roomPlayers.filter((player) => player.ready).length;
+  const allPlayersReady = roomPlayers.length >= minimumPlayers
+    && roomPlayers.every((player) => player.ready);
   const leaveLobby = onLeave || onBack;
 
-  const handleStartGame = () => {
-    if (!isReady) return;
-    setMessage('Lobby siap! Fitur permainan akan segera hadir.');
+  const handleSetReady = async () => {
+    setMessage('');
+    setIsUpdatingReady(true);
+    const result = await onSetReady?.(!currentPlayer?.ready);
+    if (result?.error) setMessage(result.error);
+    setIsUpdatingReady(false);
+  };
+
+  const handleStartGame = async () => {
+    if (!isHost || !allPlayersReady) return;
+    setMessage('');
+    setIsStartingGame(true);
+    const result = await onStartGame?.();
+    if (result?.error) setMessage(result.error);
+    setIsStartingGame(false);
   };
 
   const handleCopyRoomCode = async () => {
@@ -64,6 +92,9 @@ export default function LobbyPage({ room, roomCode, players = [], onBack, onLeav
               <div className={`player-card ${colorClass}`} aria-hidden="true">
                 {player && <span>{player.name?.slice(0, 1).toUpperCase() || '?'}</span>}
                 {player?.isHost && <span className="player-host-badge">HOST</span>}
+                {player && <span className={`player-ready-badge ${player.ready ? 'player-ready-badge-active' : ''}`}>
+                  {player.ready ? 'SIAP' : 'BELUM SIAP'}
+                </span>}
               </div>
               <div className="player-name-badge" title={player?.name || 'Menunggu pemain'}>
                 {player?.name || 'Menunggu...'}
@@ -75,14 +106,28 @@ export default function LobbyPage({ room, roomCode, players = [], onBack, onLeav
 
       <footer className="lobby-footer">
         <p className="lobby-player-count" role="status">
-          {isReady
-            ? `${roomPlayers.length} pemain siap bermain`
-            : `Menunggu pemain (${roomPlayers.length}/${minimumPlayers} minimum)`}
+          {allPlayersReady
+            ? `Semua ${roomPlayers.length} pemain siap`
+            : `${readyPlayersCount}/${roomPlayers.length} pemain siap • minimal ${minimumPlayers} pemain`}
         </p>
-        {message && <p className="lobby-message" role="status">{message}</p>}
-        <button className="btn-lobby-main" onClick={handleStartGame} disabled={!isReady}>
-          {isReady ? 'MAIN' : 'MENUNGGU PEMAIN'}
+        {message && <p className="lobby-message" role="alert">{message}</p>}
+        <button
+          className={`lobby-ready-button ${currentPlayer?.ready ? 'lobby-ready-active' : ''}`}
+          onClick={handleSetReady}
+          disabled={isUpdatingReady || room?.phase === 'playing'}
+        >
+          {isUpdatingReady ? 'MENYIMPAN...' : currentPlayer?.ready ? 'SIAP!' : 'SAYA SIAP'}
         </button>
+        {isHost && (
+          <button
+            className="btn-lobby-main"
+            onClick={handleStartGame}
+            disabled={!allPlayersReady || isStartingGame}
+            title={!allPlayersReady ? 'Pastikan minimal 3 pemain dan semua pemain sudah siap' : 'Mulai game'}
+          >
+            {isStartingGame ? 'MEMULAI...' : allPlayersReady ? 'MULAI GAME' : 'MENUNGGU PEMAIN'}
+          </button>
+        )}
       </footer>
     </main>
   );

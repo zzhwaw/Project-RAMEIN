@@ -1,0 +1,96 @@
+{
+  "tebakPeta": [
+    {
+      "id": "indonesia-kalimantan",
+      "prompt": "Pulau apakah yang ditunjukkan siluet ini?",
+      "answer": "Kalimantan",
+      "choices": ["Sumatra", "Kalimantan", "Sulawesi", "Papua"]
+    }
+  ],
+  "faktaMitos": [
+    {
+      "id": "bumi-mengelilingi-matahari",
+      "statement": "Bumi mengelilingi Matahari.",
+      "answer": true,
+      "explanation": "Bumi membutuhkan sekitar satu tahun untuk mengelilingi Matahari."
+    },
+    {
+      "id": "matahari-mengelilingi-bumi",
+      "statement": "Matahari mengelilingi Bumi.",
+      "answer": false,
+      "explanation": "Bumi yang mengelilingi Matahari."
+    },
+    {
+      "id": "suara-di-ruang-hampa",
+      "statement": "Suara dapat merambat di ruang hampa.",
+      "answer": false,
+      "explanation": "Suara memerlukan medium seperti udara, air, atau benda padat."
+    }
+  ],
+  "susunTataSurya": {
+    "prompt": "Tekan planet dari yang paling dekat dengan Matahari.",
+    "planets": [
+      { "name": "Merkurius", "distance": 1, "emoji": "🪨" },
+      { "name": "Venus", "distance": 2, "emoji": "🟠" },
+      { "name": "Bumi", "distance": 3, "emoji": "🌍" },
+      { "name": "Mars", "distance": 4, "emoji": "🔴" }
+    ]
+  },
+  "tebakPenemu": [
+    {
+      "id": "lampu-pijar",
+      "prompt": "Siapa yang terkenal mengembangkan lampu pijar praktis?",
+      "icon": "💡",
+      "answer": "Thomas Edison",
+      "choices": ["Thomas Edison", "Alexander Graham Bell", "Isaac Newton", "Nikola Tesla"]
+    }
+  ],
+  "rantaiMakanan": {
+    "prompt": "Pilih urutan rantai makanan yang benar.",
+    "chain": ["Rumput", "Belalang", "Katak"],
+    "emoji": ["🌱", "🦗", "🐸"]
+  },
+  "anatomiTubuh": [
+    {
+      "id": "paru-paru",
+      "prompt": "Pilih organ yang digunakan untuk bernapas.",
+      "answer": "Paru-paru",
+      "choices": [
+        { "name": "Paru-paru", "emoji": "🫁" },
+        { "name": "Jantung", "emoji": "❤️" },
+        { "name": "Otak", "emoji": "🧠" },
+        { "name": "Tulang", "emoji": "🦴" }
+      ]
+    }
+  ],
+  "tebakBendera": [
+    {
+      "id": "bendera-jepang",
+      "prompt": "🇯🇵",
+      "answer": "Jepang",
+      "choices": ["Jepang", "Korea Selatan", "Bangladesh", "Vietnam"]
+    }
+  ],
+  "eksperimenKimia": {
+    "prompt": "Buat satu molekul air. Pilih dua atom H dan satu atom O.",
+    "answer": ["H", "H", "O"],
+    "elements": ["H", "O", "Na", "C", "H", "Cl", "H", "O"]
+  },
+  "wujudZat": {
+    "items": [
+      { "name": "Es batu", "emoji": "🧊", "answer": "Padat" },
+      { "name": "Air minum", "emoji": "💧", "answer": "Cair" },
+      { "name": "Uap air", "emoji": "♨️", "answer": "Gas" }
+    ],
+    "choices": ["Padat", "Cair", "Gas"]
+  },
+  "tebakLandmark": [
+    {
+      "id": "candi-borobudur",
+      "prompt": "🏯",
+      "question": "Landmark apakah ini?",
+      "answer": "Candi Borobudur",
+      "choices": ["Candi Borobudur", "Menara Eiffel", "Taj Mahal", "Colosseum"]
+    }
+  ]
+}

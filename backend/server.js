@@ -16,6 +16,7 @@ const io = new Server(server, {
 const rooms = new Map();
 const MIN_PLAYERS = 3;
 const MAX_PLAYERS = 6;
+const GAME_DURATION_MS = 45_000;
 
 function cleanText(value, maxLength) {
   return typeof value === 'string'
@@ -37,6 +38,8 @@ function getRoomSnapshot(room) {
     name: room.name,
     hostId: room.hostId,
     capacity: room.capacity,
+    phase: room.phase,
+    game: room.game,
     players: Array.from(room.players.values()),
     minPlayers: MIN_PLAYERS,
     maxPlayers: MAX_PLAYERS,
@@ -45,6 +48,22 @@ function getRoomSnapshot(room) {
 
 function broadcastRoom(room) {
   io.to(room.id).emit('room:updated', getRoomSnapshot(room));
+}
+
+function finishGame(room, reason) {
+  if (room.phase !== 'playing') return;
+
+  clearTimeout(room.gameTimeout);
+  room.gameTimeout = null;
+  room.phase = 'lobby';
+  room.game = null;
+  room.players.forEach((player) => {
+    player.ready = false;
+    player.answered = false;
+  });
+  const snapshot = getRoomSnapshot(room);
+  io.to(room.id).emit('game:ended', { room: snapshot, reason });
+  broadcastRoom(room);
 }
 
 function removePlayer(socket) {
@@ -60,6 +79,7 @@ function removePlayer(socket) {
   delete socket.data.roomId;
 
   if (room.players.size === 0) {
+    clearTimeout(room.gameTimeout);
     rooms.delete(room.id);
     return;
   }
@@ -68,6 +88,10 @@ function removePlayer(socket) {
     const nextHost = room.players.values().next().value;
     nextHost.isHost = true;
     room.hostId = nextHost.id;
+  }
+  if (room.phase === 'playing' && [...room.players.values()].every((player) => player.answered)) {
+    finishGame(room, 'all-answered');
+    return;
   }
   broadcastRoom(room);
 }
@@ -89,12 +113,14 @@ io.on('connection', (socket) => {
 
     removePlayer(socket);
     const roomId = createRoomId();
-    const player = { id: socket.id, name: playerName, isHost: true };
+    const player = { id: socket.id, name: playerName, isHost: true, ready: false, score: 0, answered: false };
     const room = {
       id: roomId,
       name: roomName,
       hostId: socket.id,
       capacity,
+      phase: 'lobby',
+      game: null,
       players: new Map([[socket.id, player]]),
     };
 
@@ -117,6 +143,10 @@ io.on('connection', (socket) => {
       callback({ error: 'Room tidak ditemukan atau host sudah keluar.' });
       return;
     }
+    if (room.phase !== 'lobby') {
+      callback({ error: 'Game sedang berlangsung. Coba gabung lagi setelah ronde selesai.' });
+      return;
+    }
     if (socket.data.roomId === room.id) {
       callback({ room: getRoomSnapshot(room) });
       return;
@@ -127,7 +157,7 @@ io.on('connection', (socket) => {
     }
 
     removePlayer(socket);
-    const player = { id: socket.id, name: playerName, isHost: false };
+    const player = { id: socket.id, name: playerName, isHost: false, ready: false, score: 0, answered: false };
     room.players.set(socket.id, player);
     socket.data.roomId = room.id;
     socket.join(room.id);
@@ -135,6 +165,104 @@ io.on('connection', (socket) => {
     const snapshot = getRoomSnapshot(room);
     broadcastRoom(room);
     callback({ room: snapshot });
+  });
+
+  socket.on('player:ready', (payload = {}, callback = () => {}) => {
+    const room = rooms.get(socket.data.roomId);
+    const player = room?.players.get(socket.id);
+    if (!room || !player) {
+      callback({ error: 'Kamu tidak berada di dalam room.' });
+      return;
+    }
+    if (room.phase !== 'lobby') {
+      callback({ error: 'Status siap tidak dapat diubah saat game berlangsung.' });
+      return;
+    }
+
+    player.ready = Boolean(payload.ready);
+    broadcastRoom(room);
+    callback({ room: getRoomSnapshot(room) });
+  });
+
+  socket.on('game:start', (payload = {}, callback = () => {}) => {
+    const room = rooms.get(socket.data.roomId);
+    if (!room || !room.players.has(socket.id)) {
+      callback({ error: 'Kamu tidak berada di dalam room.' });
+      return;
+    }
+    if (room.hostId !== socket.id) {
+      callback({ error: 'Hanya host yang dapat memulai game.' });
+      return;
+    }
+    if (room.phase !== 'lobby') {
+      callback({ error: 'Game sedang berlangsung.' });
+      return;
+    }
+    if (room.players.size < MIN_PLAYERS) {
+      callback({ error: `Minimal ${MIN_PLAYERS} pemain untuk memulai game.` });
+      return;
+    }
+    if (![...room.players.values()].every((player) => player.ready)) {
+      callback({ error: 'Semua pemain harus siap sebelum game dimulai.' });
+      return;
+    }
+
+    const now = Date.now();
+    room.phase = 'playing';
+    room.game = {
+      id: randomInt(1, 11),
+      roundId: `${room.id}-${now}`,
+      startedAt: now,
+      serverNow: now,
+      endsAt: now + GAME_DURATION_MS,
+      duration: GAME_DURATION_MS / 1000,
+    };
+    room.players.forEach((player) => {
+      player.score = 0;
+      player.answered = false;
+    });
+
+    const game = { ...room.game };
+    io.to(room.id).emit('game:started', game);
+    broadcastRoom(room);
+    room.gameTimeout = setTimeout(() => finishGame(room, 'time-up'), GAME_DURATION_MS);
+    callback({ game });
+  });
+
+  socket.on('game:answer', (payload = {}, callback = () => {}) => {
+    const room = rooms.get(socket.data.roomId);
+    const player = room?.players.get(socket.id);
+    if (!room || !player || room.phase !== 'playing' || !room.game) {
+      callback({ error: 'Tidak ada game aktif untuk dijawab.' });
+      return;
+    }
+    if (payload.roundId !== room.game.roundId) {
+      callback({ error: 'Jawaban ini bukan untuk ronde yang sedang berjalan.' });
+      return;
+    }
+    if (player.answered) {
+      callback({ error: 'Jawaban untuk ronde ini sudah diterima.' });
+      return;
+    }
+    if (Date.now() >= room.game.endsAt) {
+      finishGame(room, 'time-up');
+      callback({ error: 'Waktu permainan sudah habis.' });
+      return;
+    }
+
+    const score = Number(payload.score);
+    if (!Number.isFinite(score) || score < 0) {
+      callback({ error: 'Skor jawaban tidak valid.' });
+      return;
+    }
+    player.score = Math.min(1500, Math.round(score));
+    player.answered = true;
+    broadcastRoom(room);
+    callback({ ok: true, score: player.score });
+
+    if ([...room.players.values()].every((roomPlayer) => roomPlayer.answered)) {
+      finishGame(room, 'all-answered');
+    }
   });
 
   socket.on('room:leave', (callback = () => {}) => {

@@ -988,6 +988,25 @@ body {
   letter-spacing: 0.8px;
 }
 
+.player-ready-badge {
+  position: absolute;
+  right: 8px;
+  bottom: 9px;
+  z-index: 2;
+  padding: 4px 7px;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  border-radius: 9px;
+  background: rgba(43, 43, 43, 0.58);
+  color: #fff;
+  font-size: 0.56rem;
+  font-weight: 900;
+  letter-spacing: 0.4px;
+}
+
+.player-ready-badge-active {
+  background: #198b45;
+}
+
 /* Tombol MAIN Bawah */
 .lobby-footer {
   min-height: 100px;
@@ -1042,6 +1061,39 @@ body {
   box-shadow: none;
   cursor: not-allowed;
   transform: none;
+}
+
+.lobby-ready-button {
+  min-width: min(100%, 260px);
+  min-height: 48px;
+  padding: 10px 24px;
+  border: 3px solid #292536;
+  border-radius: 16px;
+  background: #4fc4ff;
+  color: #292536;
+  box-shadow: 4px 4px 0 #292536;
+  font-size: 1rem;
+  font-weight: 900;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: transform 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
+}
+
+.lobby-ready-button:hover:not(:disabled) {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0 #292536;
+}
+
+.lobby-ready-active { background: #8fe1a2; }
+
+.lobby-ready-button:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+
+.lobby-ready-button:focus-visible {
+  outline: 3px solid #7356d8;
+  outline-offset: 3px;
 }
 
 .btn-lobby-main:focus-visible,

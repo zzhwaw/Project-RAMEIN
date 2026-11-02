@@ -5,6 +5,7 @@ import RoomSelectPage from './components/RoomSelectPage';
 import CreateRoomPage from './components/CreateRoomPage';
 import JoinRoomPage from './components/JoinRoomPage';
 import LobbyPage from './components/LobbyPage';
+import GameArena from './components/GameArena';
 
 const PAGE_TRANSITION_MS = 700;
 
@@ -12,6 +13,8 @@ export default function App() {
   const [page, setPage] = useState('landing');
   const [navigation, setNavigation] = useState(null);
   const [room, setRoom] = useState(null);
+  const [game, setGame] = useState(null);
+  const [timeLeft, setTimeLeft] = useState(0);
   const [lobbyOrigin, setLobbyOrigin] = useState('create');
   const [socket] = useState(() => io(import.meta.env.VITE_SOCKET_URL || 'http://localhost:3001', {
     autoConnect: false,
@@ -20,14 +23,45 @@ export default function App() {
 
   useEffect(() => {
     const handleRoomUpdate = (updatedRoom) => setRoom(updatedRoom);
+    const handleGameStarted = (startedGame) => {
+      const synchronizedGame = {
+        ...startedGame,
+        clientClockOffset: startedGame.serverNow - Date.now(),
+      };
+      setGame(synchronizedGame);
+      setTimeLeft(Math.max(0, (startedGame.endsAt - Date.now() - synchronizedGame.clientClockOffset) / 1000));
+      setPage('game');
+    };
+    const handleGameEnded = ({ room: updatedRoom }) => {
+      setRoom(updatedRoom);
+      setGame(null);
+      setPage('lobby');
+    };
+
     socket.on('room:updated', handleRoomUpdate);
+    socket.on('game:started', handleGameStarted);
+    socket.on('game:ended', handleGameEnded);
 
     return () => {
       window.clearTimeout(navigationTimeout.current);
       socket.off('room:updated', handleRoomUpdate);
+      socket.off('game:started', handleGameStarted);
+      socket.off('game:ended', handleGameEnded);
       socket.disconnect();
     };
   }, [socket]);
+
+  useEffect(() => {
+    if (!game?.endsAt) return undefined;
+
+    const updateTimeLeft = () => {
+      const clientNow = Date.now() + game.clientClockOffset;
+      setTimeLeft(Math.max(0, (game.endsAt - clientNow) / 1000));
+    };
+    updateTimeLeft();
+    const timerId = window.setInterval(updateTimeLeft, 100);
+    return () => window.clearInterval(timerId);
+  }, [game]);
 
   const requestRoom = (eventName, payload) => new Promise((resolve) => {
     let completed = false;
@@ -80,6 +114,13 @@ export default function App() {
   const handleLeaveRoom = () => {
     socket.emit('room:leave');
     navigateWithSlide(lobbyOrigin, 'lobby', () => setRoom(null));
+  };
+
+  const handleSetReady = (ready) => requestRoom('player:ready', { ready });
+  const handleStartGame = () => requestRoom('game:start', {});
+  const handleGameAnswer = (score) => {
+    if (!game) return;
+    socket.emit('game:answer', { roundId: game.roundId, score });
   };
 
   const navigateWithSlide = (target, from = page, onComplete) => {
@@ -157,7 +198,20 @@ export default function App() {
         <LobbyPage
           className={getSlideClass('lobby')}
           room={room}
+          currentPlayerId={socket.id}
           onLeave={handleLeaveRoom}
+          onSetReady={handleSetReady}
+          onStartGame={handleStartGame}
+        />
+      )}
+      {page === 'game' && game && (
+        <GameArena
+          key={game.roundId}
+          gameId={game.id}
+          roundId={game.roundId}
+          timeLeft={timeLeft}
+          roundDuration={game.duration}
+          onAnswer={handleGameAnswer}
         />
       )}
     </div>
