@@ -1,8 +1,6 @@
 import { useState } from 'react';
 
-const slimeColors = ['red', 'blue', 'green', 'yellow', 'pink', 'dark'];
-
-export default function CreateRoomPage({ onBack, onCreateRoom }) {
+export default function CreateRoomPage({ className = '', onBack, onCreateRoom }) {
   const [roomName, setRoomName] = useState('');
   const [playerName, setPlayerName] = useState('');
   const [capacity, setCapacity] = useState('6');
@@ -23,22 +21,17 @@ export default function CreateRoomPage({ onBack, onCreateRoom }) {
   };
 
   return (
-    <main className="create-room-page">
+    <main className={`create-room-page ${className}`}>
+      <div className="create-room-blobs" aria-hidden="true">
+        {Array.from({ length: 10 }, (_, index) => (
+          <span className="create-room-blob" key={index} />
+        ))}
+      </div>
       <button className="create-back-button" onClick={onBack} aria-label="Kembali ke pilihan room">
         &#10094;
       </button>
 
       <div className="create-room-content">
-        <div className="slime-line" aria-hidden="true">
-          {slimeColors.map((color, index) => (
-            <div className={`slime slime-${color}`} key={color} style={{ '--slime-index': index }}>
-              <span className="slime-eye slime-eye-left" />
-              <span className="slime-eye slime-eye-right" />
-              <span className="slime-mouth" />
-            </div>
-          ))}
-        </div>
-
         <section className="create-room-card">
           <p className="create-room-eyebrow">RAMEIN BARENG TEMAN!</p>
           <h1>Buat Room</h1>
