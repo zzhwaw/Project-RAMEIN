@@ -1,6 +1,13 @@
-export default function RoomSelectPage({ isOpen, isCreating, isJoining, onBack, onCreateRoom, onJoinRoom }) {
+export default function RoomSelectPage({
+  className = '',
+  isOpen,
+  isTransitioning,
+  onBack,
+  onCreateRoom,
+  onJoinRoom,
+}) {
   return (
-    <div className={`room-select-container ${isOpen ? 'active' : ''} ${isCreating ? 'creating' : ''} ${isJoining ? 'joining' : ''}`}>
+    <div className={`room-select-container ${isOpen ? 'active' : ''} ${className}`}>
       {/* Panel Kiri - PINK (BUAT ROOM) */}
       <div className="panel panel-pink">
         <div className="bg-blobs">
@@ -13,12 +20,12 @@ export default function RoomSelectPage({ isOpen, isCreating, isJoining, onBack, 
           <div className="blob blob-pink-7"></div>
         </div>
 
-        <button className="btn-room" onClick={onCreateRoom}>
+        <button className="btn-room" onClick={onCreateRoom} disabled={isTransitioning}>
           BUAT ROOM
         </button>
 
         {/* Tombol Back (<) */}
-        <button className="btn-back" onClick={onBack}>
+        <button className="btn-back" onClick={onBack} disabled={isTransitioning}>
           &#10094;
         </button>
       </div>
@@ -35,7 +42,7 @@ export default function RoomSelectPage({ isOpen, isCreating, isJoining, onBack, 
           <div className="blob blob-blue-7"></div>
         </div>
 
-        <button className="btn-room" onClick={onJoinRoom} disabled={isJoining}>
+        <button className="btn-room" onClick={onJoinRoom} disabled={isTransitioning}>
           GABUNG ROOM
         </button>
       </div>

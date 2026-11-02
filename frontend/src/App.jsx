@@ -8,22 +8,20 @@ import LobbyPage from './components/LobbyPage';
 
 export default function App() {
   const [page, setPage] = useState('landing');
-  const [isCreatingRoom, setIsCreatingRoom] = useState(false);
-  const [isJoiningRoom, setIsJoiningRoom] = useState(false);
+  const [navigation, setNavigation] = useState(null);
   const [room, setRoom] = useState(null);
+  const [lobbyOrigin, setLobbyOrigin] = useState('create');
   const [socket] = useState(() => io(import.meta.env.VITE_SOCKET_URL || 'http://localhost:3001', {
     autoConnect: false,
   }));
-  const createRoomTimeout = useRef(null);
-  const joinRoomTimeout = useRef(null);
+  const navigationTimeout = useRef(null);
 
   useEffect(() => {
     const handleRoomUpdate = (updatedRoom) => setRoom(updatedRoom);
     socket.on('room:updated', handleRoomUpdate);
 
     return () => {
-      window.clearTimeout(createRoomTimeout.current);
-      window.clearTimeout(joinRoomTimeout.current);
+      window.clearTimeout(navigationTimeout.current);
       socket.off('room:updated', handleRoomUpdate);
       socket.disconnect();
     };
@@ -61,7 +59,8 @@ export default function App() {
     const result = await requestRoom('room:create', roomDetails);
     if (result.room) {
       setRoom(result.room);
-      setPage('lobby');
+      setLobbyOrigin('create');
+      navigateWithSlide('lobby', 'create');
     }
     return result;
   };
@@ -70,60 +69,90 @@ export default function App() {
     const result = await requestRoom('room:join', playerDetails);
     if (result.room) {
       setRoom(result.room);
-      setPage('lobby');
+      setLobbyOrigin('join');
+      navigateWithSlide('lobby', 'join');
     }
     return result;
   };
 
   const handleLeaveRoom = () => {
     socket.emit('room:leave');
-    setRoom(null);
-    setPage('select');
+    navigateWithSlide(lobbyOrigin, 'lobby', () => setRoom(null));
   };
 
-  const startCreateRoomPage = () => {
-    if (isCreatingRoom) return;
+  const navigateWithSlide = (target, from = page, onComplete) => {
+    if (navigation || from === target) return;
 
-    setIsCreatingRoom(true);
-    createRoomTimeout.current = window.setTimeout(() => {
-      setPage('create');
-      setIsCreatingRoom(false);
-    }, 700);
+    setNavigation({ from, to: target });
+    navigationTimeout.current = window.setTimeout(() => {
+      setPage(target);
+      setNavigation(null);
+      onComplete?.();
+    }, 620);
   };
 
-  const startJoinRoomPage = () => {
-    if (isJoiningRoom) return;
+  const getSlideClass = (screen) => {
+    if (!navigation) return '';
 
-    setIsJoiningRoom(true);
-    joinRoomTimeout.current = window.setTimeout(() => {
-      setPage('join');
-      setIsJoiningRoom(false);
-    }, 700);
+    const transitionClasses = {
+      'select-create': { select: 'slide-out-to-left', create: 'slide-in-from-right' },
+      'select-join': { select: 'slide-out-to-right', join: 'slide-in-from-left' },
+      'create-select': { create: 'slide-out-to-left', select: 'slide-in-from-right' },
+      'join-select': { join: 'slide-out-to-right', select: 'slide-in-from-left' },
+      'create-lobby': { create: 'slide-out-to-left', lobby: 'slide-in-from-right' },
+      'join-lobby': { join: 'slide-out-to-right', lobby: 'slide-in-from-left' },
+      'lobby-create': { lobby: 'slide-out-to-right', create: 'slide-in-from-left' },
+      'lobby-join': { lobby: 'slide-out-to-left', join: 'slide-in-from-right' },
+    };
+
+    return transitionClasses[`${navigation.from}-${navigation.to}`]?.[screen] || '';
   };
+
+  const showRoomSelect = page === 'landing'
+    || page === 'select'
+    || (navigation && (navigation.from === 'select' || navigation.to === 'select'));
+  const showCreateRoom = page === 'create'
+    || (navigation && (navigation.from === 'create' || navigation.to === 'create'));
+  const showJoinRoom = page === 'join'
+    || (navigation && (navigation.from === 'join' || navigation.to === 'join'));
+  const showLobby = page === 'lobby'
+    || (navigation && (navigation.from === 'lobby' || navigation.to === 'lobby'));
 
   return (
     <div className="app-shell">
       {page !== 'create' && page !== 'join' && page !== 'lobby' && (
         <LandingPage onStart={() => setPage('select')} />
       )}
-      {(page === 'landing' || page === 'select' || isCreatingRoom || isJoiningRoom) && (
+      {showRoomSelect && (
         <RoomSelectPage
-          isOpen={page === 'select' || isCreatingRoom || isJoiningRoom}
-          isCreating={isCreatingRoom}
-          isJoining={isJoiningRoom}
+          className={getSlideClass('select')}
+          isOpen={page === 'select' || Boolean(navigation)}
+          isTransitioning={Boolean(navigation)}
           onBack={() => setPage('landing')}
-          onCreateRoom={startCreateRoomPage}
-          onJoinRoom={startJoinRoomPage}
+          onCreateRoom={() => navigateWithSlide('create')}
+          onJoinRoom={() => navigateWithSlide('join')}
         />
       )}
-      {page === 'create' && (
-        <CreateRoomPage onBack={() => setPage('select')} onCreateRoom={handleCreateRoom} />
+      {showCreateRoom && (
+        <CreateRoomPage
+          className={getSlideClass('create')}
+          onBack={() => navigateWithSlide('select')}
+          onCreateRoom={handleCreateRoom}
+        />
       )}
-      {page === 'join' && (
-        <JoinRoomPage onBack={() => setPage('select')} onJoinRoom={handleJoinRoom} />
+      {showJoinRoom && (
+        <JoinRoomPage
+          className={getSlideClass('join')}
+          onBack={() => navigateWithSlide('select')}
+          onJoinRoom={handleJoinRoom}
+        />
       )}
-      {page === 'lobby' && room && (
-        <LobbyPage room={room} onLeave={handleLeaveRoom} />
+      {showLobby && room && (
+        <LobbyPage
+          className={getSlideClass('lobby')}
+          room={room}
+          onLeave={handleLeaveRoom}
+        />
       )}
     </div>
   );

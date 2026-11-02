@@ -1,8 +1,6 @@
 import { useState } from 'react';
 
-const slimeColors = ['blue', 'green', 'yellow', 'pink', 'red', 'dark'];
-
-export default function JoinRoomPage({ onBack, onJoinRoom }) {
+export default function JoinRoomPage({ className = '', onBack, onJoinRoom }) {
   const [roomCode, setRoomCode] = useState('');
   const [playerName, setPlayerName] = useState('');
   const [error, setError] = useState('');
@@ -26,22 +24,12 @@ export default function JoinRoomPage({ onBack, onJoinRoom }) {
   };
 
   return (
-    <main className="join-room-page">
+    <main className={`join-room-page ${className}`}>
       <button className="join-back-button" onClick={onBack} aria-label="Kembali ke pilihan room">
         &#10094;
       </button>
 
       <div className="join-room-content">
-        <div className="join-slime-line" aria-hidden="true">
-          {slimeColors.map((color, index) => (
-            <div className={`slime slime-${color}`} key={color} style={{ '--slime-index': index }}>
-              <span className="slime-eye slime-eye-left" />
-              <span className="slime-eye slime-eye-right" />
-              <span className="slime-mouth" />
-            </div>
-          ))}
-        </div>
-
         <section className="join-room-card">
           <p className="join-room-eyebrow">TEMAN-TEMAN SUDAH MENUNGGU!</p>
           <h1>Gabung Room</h1>
