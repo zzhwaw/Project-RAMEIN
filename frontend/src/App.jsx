@@ -6,6 +6,8 @@ import CreateRoomPage from './components/CreateRoomPage';
 import JoinRoomPage from './components/JoinRoomPage';
 import LobbyPage from './components/LobbyPage';
 
+const PAGE_TRANSITION_MS = 700;
+
 export default function App() {
   const [page, setPage] = useState('landing');
   const [navigation, setNavigation] = useState(null);
@@ -83,12 +85,16 @@ export default function App() {
   const navigateWithSlide = (target, from = page, onComplete) => {
     if (navigation || from === target) return;
 
+    const transitionDuration = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      ? 0
+      : PAGE_TRANSITION_MS;
+
     setNavigation({ from, to: target });
     navigationTimeout.current = window.setTimeout(() => {
       setPage(target);
       setNavigation(null);
       onComplete?.();
-    }, 620);
+    }, transitionDuration);
   };
 
   const getSlideClass = (screen) => {
@@ -120,7 +126,7 @@ export default function App() {
 
   return (
     <div className="app-shell">
-      {page !== 'create' && page !== 'join' && page !== 'lobby' && (
+      {page === 'landing' && !navigation && (
         <LandingPage onStart={() => setPage('select')} />
       )}
       {showRoomSelect && (
