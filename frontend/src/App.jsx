@@ -125,9 +125,13 @@ export default function App() {
 
   const handleSetReady = (ready) => requestRoom('player:ready', { ready });
   const handleStartGame = () => requestRoom('game:start', {});
-  const handleGameAnswer = (score) => {
+  const handleGameAnswer = (score, progress) => {
     if (!game) return;
-    socket.emit('game:answer', { roundId: game.roundId, score });
+    socket.emit('game:answer', { roundId: game.roundId, reportedScore: score, ...progress });
+  };
+  const handleGameProgress = (progress) => {
+    if (!game) return;
+    socket.emit('game:progress', { roundId: game.roundId, ...progress });
   };
 
   const navigateWithSlide = (target, from = page, onComplete) => {
@@ -219,6 +223,7 @@ export default function App() {
           timeLeft={timeLeft}
           roundDuration={game.duration}
           onAnswer={handleGameAnswer}
+          onProgress={handleGameProgress}
         />
       )}
       {page === 'scoreboard' && finalStandings && (

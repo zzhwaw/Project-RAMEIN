@@ -107,6 +107,55 @@
   line-height: 1.5;
 }
 
+.question-progress {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 15px;
+  color: #635c6b;
+}
+
+.question-progress-track {
+  height: 10px;
+  flex: 1;
+  overflow: hidden;
+  border: 2px solid var(--arena-ink);
+  border-radius: 999px;
+  background: #f1edf8;
+}
+
+.question-progress-track span {
+  height: 100%;
+  display: block;
+  border-radius: inherit;
+  background: #42c879;
+  transition: width 180ms ease;
+}
+
+.question-progress > strong {
+  flex: 0 0 auto;
+  font-size: 0.72rem;
+  letter-spacing: 0.5px;
+}
+
+.questions-complete {
+  min-height: 190px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border: 2px dashed #7ecb90;
+  border-radius: 20px;
+  background: #effbf0;
+  color: var(--arena-ink);
+  text-align: center;
+}
+
+.questions-complete > span { font-size: 3rem; }
+.questions-complete > strong { font-size: 1.3rem; }
+.questions-complete > p { color: #635c6b; font-weight: 700; }
+
 .mini-game-choices {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -172,6 +221,7 @@
 }
 
 .map-question-art {
+  position: relative;
   width: 150px;
   height: 150px;
   display: grid;
@@ -187,6 +237,21 @@
   height: 118px;
   fill: #ff72c6;
   filter: drop-shadow(4px 5px 0 rgba(41, 37, 54, 0.16));
+}
+
+.map-question-art > span {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border: 2px solid var(--arena-ink);
+  border-radius: 50%;
+  background: #ffdf75;
+  font-size: 0.82rem;
+  font-weight: 900;
 }
 
 .science-statement {
@@ -428,6 +493,7 @@
 }
 
 .landmark-question svg { width: 100%; max-height: 120px; fill: #292536; }
+.landmark-question > span { font-size: 5rem; }
 
 .game-result {
   width: min(100%, 680px);
@@ -440,6 +506,13 @@
   border: 2px solid var(--arena-ink);
   border-radius: 14px;
   box-shadow: 4px 4px 0 var(--arena-ink);
+  font-weight: 800;
+}
+
+.game-question-count {
+  margin-top: 14px;
+  color: #635c6b;
+  font-size: 0.82rem;
   font-weight: 800;
 }
 
@@ -462,6 +535,7 @@
   .mini-game-panel { border-radius: 20px; box-shadow: 5px 5px 0 var(--arena-ink); }
   .mini-game-choices { gap: 9px; }
   .mini-game-choice { min-height: 53px; padding: 9px; font-size: 0.88rem; }
+  .question-progress > strong { font-size: 0.64rem; }
   .planet-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .planet-choice { min-height: 88px; }
   .game-result { flex-direction: column; text-align: center; }

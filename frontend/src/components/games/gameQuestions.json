@@ -1,96 +1,134 @@
 {
   "tebakPeta": [
-    {
-      "id": "indonesia-kalimantan",
-      "prompt": "Pulau apakah yang ditunjukkan siluet ini?",
-      "answer": "Kalimantan",
-      "choices": ["Sumatra", "Kalimantan", "Sulawesi", "Papua"]
-    }
+    { "id": "peta-kalimantan", "prompt": "Pulau apakah yang dikenal memiliki bentuk menyerupai huruf K?", "map": "K", "answer": "Kalimantan", "choices": ["Sumatra", "Kalimantan", "Sulawesi", "Papua"] },
+    { "id": "peta-sulawesi", "prompt": "Pulau apakah yang memiliki empat semenanjung panjang?", "map": "S", "answer": "Sulawesi", "choices": ["Jawa", "Bali", "Sulawesi", "Lombok"] },
+    { "id": "peta-papua", "prompt": "Pulau terbesar di Indonesia bagian timur adalah...", "map": "P", "answer": "Papua", "choices": ["Papua", "Madura", "Bangka", "Bali"] },
+    { "id": "peta-sumatra", "prompt": "Pulau besar di sebelah barat Jawa adalah...", "map": "S", "answer": "Sumatra", "choices": ["Sumatra", "Kalimantan", "Flores", "Timor"] },
+    { "id": "peta-jawa", "prompt": "Pulau dengan ibu kota Jakarta adalah...", "map": "J", "answer": "Jawa", "choices": ["Jawa", "Sumatra", "Sulawesi", "Seram"] },
+    { "id": "peta-bali", "prompt": "Pulau yang terletak di sebelah timur Jawa adalah...", "map": "B", "answer": "Bali", "choices": ["Lombok", "Bali", "Sumbawa", "Madura"] },
+    { "id": "peta-lombok", "prompt": "Pulau yang berada di sebelah timur Bali adalah...", "map": "L", "answer": "Lombok", "choices": ["Flores", "Lombok", "Bangka", "Belitung"] },
+    { "id": "peta-flores", "prompt": "Pulau di Nusa Tenggara Timur yang namanya juga berarti bunga adalah...", "map": "F", "answer": "Flores", "choices": ["Flores", "Bali", "Nias", "Buru"] },
+    { "id": "peta-madura", "prompt": "Pulau di sebelah timur laut Jawa yang terkenal dengan karapan sapi adalah...", "map": "M", "answer": "Madura", "choices": ["Madura", "Bangka", "Bali", "Seram"] },
+    { "id": "peta-bangka", "prompt": "Pulau penghasil timah di lepas pantai timur Sumatra adalah...", "map": "B", "answer": "Bangka", "choices": ["Bangka", "Lombok", "Halmahera", "Sumbawa"] }
   ],
   "faktaMitos": [
-    {
-      "id": "bumi-mengelilingi-matahari",
-      "statement": "Bumi mengelilingi Matahari.",
-      "answer": true,
-      "explanation": "Bumi membutuhkan sekitar satu tahun untuk mengelilingi Matahari."
-    },
-    {
-      "id": "matahari-mengelilingi-bumi",
-      "statement": "Matahari mengelilingi Bumi.",
-      "answer": false,
-      "explanation": "Bumi yang mengelilingi Matahari."
-    },
-    {
-      "id": "suara-di-ruang-hampa",
-      "statement": "Suara dapat merambat di ruang hampa.",
-      "answer": false,
-      "explanation": "Suara memerlukan medium seperti udara, air, atau benda padat."
-    }
+    { "id": "bumi-mengelilingi-matahari", "statement": "Bumi mengelilingi Matahari.", "answer": true, "explanation": "Bumi membutuhkan sekitar satu tahun untuk mengelilingi Matahari." },
+    { "id": "matahari-mengelilingi-bumi", "statement": "Matahari mengelilingi Bumi.", "answer": false, "explanation": "Bumi yang mengelilingi Matahari." },
+    { "id": "suara-di-ruang-hampa", "statement": "Suara dapat merambat di ruang hampa.", "answer": false, "explanation": "Suara memerlukan medium seperti udara, air, atau benda padat." },
+    { "id": "air-mendidih", "statement": "Air murni mendidih sekitar 100°C pada tekanan udara normal.", "answer": true, "explanation": "Titik didih air berubah jika tekanan berubah." },
+    { "id": "tumbuhan-fotosintesis", "statement": "Tumbuhan menggunakan cahaya untuk membantu fotosintesis.", "answer": true, "explanation": "Cahaya menyediakan energi untuk fotosintesis." },
+    { "id": "petir-lebih-panas", "statement": "Kilat petir dapat lebih panas daripada permukaan Matahari.", "answer": true, "explanation": "Saluran petir dapat mencapai suhu yang sangat tinggi." },
+    { "id": "bulan-bercahaya", "statement": "Bulan menghasilkan cahaya sendiri seperti bintang.", "answer": false, "explanation": "Bulan tampak terang karena memantulkan cahaya Matahari." },
+    { "id": "oksigen-udara", "statement": "Oksigen adalah gas paling banyak di atmosfer Bumi.", "answer": false, "explanation": "Nitrogen adalah gas terbanyak di atmosfer Bumi." },
+    { "id": "magnet-besi", "statement": "Magnet dapat menarik benda yang mengandung besi.", "answer": true, "explanation": "Besi termasuk bahan feromagnetik." },
+    { "id": "paus-mamalia", "statement": "Paus bernapas dengan paru-paru dan termasuk mamalia.", "answer": true, "explanation": "Paus naik ke permukaan untuk mengambil napas." }
   ],
   "susunTataSurya": {
     "prompt": "Tekan planet dari yang paling dekat dengan Matahari.",
-    "planets": [
-      { "name": "Merkurius", "distance": 1, "emoji": "🪨" },
-      { "name": "Venus", "distance": 2, "emoji": "🟠" },
-      { "name": "Bumi", "distance": 3, "emoji": "🌍" },
-      { "name": "Mars", "distance": 4, "emoji": "🔴" }
+    "questions": [
+      { "id": "planet-dalam-1", "planets": [{ "name": "Merkurius", "distance": 1, "emoji": "🪨" }, { "name": "Venus", "distance": 2, "emoji": "🟠" }, { "name": "Bumi", "distance": 3, "emoji": "🌍" }, { "name": "Mars", "distance": 4, "emoji": "🔴" }] },
+      { "id": "planet-dalam-2", "planets": [{ "name": "Venus", "distance": 2, "emoji": "🟠" }, { "name": "Mars", "distance": 4, "emoji": "🔴" }, { "name": "Merkurius", "distance": 1, "emoji": "🪨" }, { "name": "Bumi", "distance": 3, "emoji": "🌍" }] },
+      { "id": "planet-luar-1", "planets": [{ "name": "Jupiter", "distance": 5, "emoji": "🟤" }, { "name": "Mars", "distance": 4, "emoji": "🔴" }, { "name": "Saturnus", "distance": 6, "emoji": "🪐" }, { "name": "Bumi", "distance": 3, "emoji": "🌍" }] },
+      { "id": "planet-luar-2", "planets": [{ "name": "Neptunus", "distance": 8, "emoji": "🔵" }, { "name": "Uranus", "distance": 7, "emoji": "🩵" }, { "name": "Saturnus", "distance": 6, "emoji": "🪐" }, { "name": "Jupiter", "distance": 5, "emoji": "🟤" }] },
+      { "id": "planet-campuran-1", "planets": [{ "name": "Mars", "distance": 4, "emoji": "🔴" }, { "name": "Saturnus", "distance": 6, "emoji": "🪐" }, { "name": "Venus", "distance": 2, "emoji": "🟠" }, { "name": "Uranus", "distance": 7, "emoji": "🩵" }] },
+      { "id": "planet-campuran-2", "planets": [{ "name": "Bumi", "distance": 3, "emoji": "🌍" }, { "name": "Jupiter", "distance": 5, "emoji": "🟤" }, { "name": "Merkurius", "distance": 1, "emoji": "🪨" }, { "name": "Neptunus", "distance": 8, "emoji": "🔵" }] },
+      { "id": "planet-tengah-1", "planets": [{ "name": "Saturnus", "distance": 6, "emoji": "🪐" }, { "name": "Bumi", "distance": 3, "emoji": "🌍" }, { "name": "Mars", "distance": 4, "emoji": "🔴" }, { "name": "Jupiter", "distance": 5, "emoji": "🟤" }] },
+      { "id": "planet-tengah-2", "planets": [{ "name": "Uranus", "distance": 7, "emoji": "🩵" }, { "name": "Venus", "distance": 2, "emoji": "🟠" }, { "name": "Jupiter", "distance": 5, "emoji": "🟤" }, { "name": "Merkurius", "distance": 1, "emoji": "🪨" }] },
+      { "id": "planet-campuran-3", "planets": [{ "name": "Neptunus", "distance": 8, "emoji": "🔵" }, { "name": "Mars", "distance": 4, "emoji": "🔴" }, { "name": "Saturnus", "distance": 6, "emoji": "🪐" }, { "name": "Venus", "distance": 2, "emoji": "🟠" }] },
+      { "id": "planet-campuran-4", "planets": [{ "name": "Jupiter", "distance": 5, "emoji": "🟤" }, { "name": "Merkurius", "distance": 1, "emoji": "🪨" }, { "name": "Uranus", "distance": 7, "emoji": "🩵" }, { "name": "Bumi", "distance": 3, "emoji": "🌍" }] }
     ]
   },
   "tebakPenemu": [
-    {
-      "id": "lampu-pijar",
-      "prompt": "Siapa yang terkenal mengembangkan lampu pijar praktis?",
-      "icon": "💡",
-      "answer": "Thomas Edison",
-      "choices": ["Thomas Edison", "Alexander Graham Bell", "Isaac Newton", "Nikola Tesla"]
-    }
+    { "id": "lampu-pijar", "prompt": "Siapa yang terkenal mengembangkan lampu pijar praktis?", "icon": "💡", "answer": "Thomas Edison", "choices": ["Thomas Edison", "Alexander Graham Bell", "Isaac Newton", "Nikola Tesla"] },
+    { "id": "telepon", "prompt": "Tokoh yang terkenal mematenkan telepon awal adalah...", "icon": "☎️", "answer": "Alexander Graham Bell", "choices": ["Alexander Graham Bell", "Louis Pasteur", "Galileo Galilei", "Wright Bersaudara"] },
+    { "id": "pesawat", "prompt": "Siapa yang terkenal berhasil menerbangkan pesawat bermesin pertama?", "icon": "✈️", "answer": "Wright Bersaudara", "choices": ["Wright Bersaudara", "Thomas Edison", "James Watt", "Michael Faraday"] },
+    { "id": "radioaktif", "prompt": "Ilmuwan yang meneliti radioaktivitas dan menemukan polonium adalah...", "icon": "⚛️", "answer": "Marie Curie", "choices": ["Marie Curie", "Ada Lovelace", "Jane Goodall", "Rosalind Franklin"] },
+    { "id": "gravitasi", "prompt": "Ilmuwan yang merumuskan hukum gravitasi klasik adalah...", "icon": "🍎", "answer": "Isaac Newton", "choices": ["Isaac Newton", "Albert Einstein", "Charles Darwin", "Niels Bohr"] },
+    { "id": "teori-relativitas", "prompt": "Siapa yang memperkenalkan teori relativitas?", "icon": "⏳", "answer": "Albert Einstein", "choices": ["Albert Einstein", "Isaac Newton", "Nikola Tesla", "James Watt"] },
+    { "id": "mesin-uap", "prompt": "Siapa yang menyempurnakan mesin uap yang mendorong Revolusi Industri?", "icon": "🚂", "answer": "James Watt", "choices": ["James Watt", "Thomas Edison", "Tim Berners-Lee", "Alexander Fleming"] },
+    { "id": "penisilin", "prompt": "Penemu penisilin yang terkenal adalah...", "icon": "🧫", "answer": "Alexander Fleming", "choices": ["Alexander Fleming", "Louis Pasteur", "Gregor Mendel", "Antonie van Leeuwenhoek"] },
+    { "id": "program-komputer", "prompt": "Tokoh yang sering disebut sebagai programmer komputer pertama adalah...", "icon": "💻", "answer": "Ada Lovelace", "choices": ["Ada Lovelace", "Marie Curie", "Katherine Johnson", "Jane Goodall"] },
+    { "id": "mesin-cetak", "prompt": "Tokoh Eropa yang terkenal mengembangkan mesin cetak dengan huruf lepas adalah...", "icon": "📰", "answer": "Johannes Gutenberg", "choices": ["Johannes Gutenberg", "Marco Polo", "Galileo Galilei", "Leonardo da Vinci"] }
   ],
   "rantaiMakanan": {
     "prompt": "Pilih urutan rantai makanan yang benar.",
-    "chain": ["Rumput", "Belalang", "Katak"],
-    "emoji": ["🌱", "🦗", "🐸"]
+    "questions": [
+      { "id": "rantai-rumput", "chain": ["Rumput", "Belalang", "Katak"], "emoji": ["🌱", "🦗", "🐸"] },
+      { "id": "rantai-padi", "chain": ["Padi", "Tikus", "Ular"], "emoji": ["🌾", "🐭", "🐍"] },
+      { "id": "rantai-laut", "chain": ["Fitoplankton", "Ikan kecil", "Ikan besar"], "emoji": ["🦠", "🐟", "🐠"] },
+      { "id": "rantai-kebun", "chain": ["Daun", "Ulat", "Burung"], "emoji": ["🍃", "🐛", "🐦"] },
+      { "id": "rantai-hutan", "chain": ["Rumput", "Kelinci", "Rubah"], "emoji": ["🌱", "🐇", "🦊"] },
+      { "id": "rantai-kolam", "chain": ["Alga", "Kecebong", "Ikan"], "emoji": ["🪴", "🐸", "🐟"] },
+      { "id": "rantai-savana", "chain": ["Rumput", "Zebra", "Singa"], "emoji": ["🌿", "🦓", "🦁"] },
+      { "id": "rantai-serangga", "chain": ["Bunga", "Kupu-kupu", "Laba-laba"], "emoji": ["🌼", "🦋", "🕷️"] },
+      { "id": "rantai-laut-2", "chain": ["Rumput laut", "Kepiting", "Gurita"], "emoji": ["🌿", "🦀", "🐙"] },
+      { "id": "rantai-hutan-2", "chain": ["Biji-bijian", "Ayam", "Elang"], "emoji": ["🌰", "🐔", "🦅"] }
+    ]
   },
   "anatomiTubuh": [
-    {
-      "id": "paru-paru",
-      "prompt": "Pilih organ yang digunakan untuk bernapas.",
-      "answer": "Paru-paru",
-      "choices": [
-        { "name": "Paru-paru", "emoji": "🫁" },
-        { "name": "Jantung", "emoji": "❤️" },
-        { "name": "Otak", "emoji": "🧠" },
-        { "name": "Tulang", "emoji": "🦴" }
-      ]
-    }
+    { "id": "paru-paru", "prompt": "Organ yang membantu kita bernapas adalah...", "answer": "Paru-paru", "choices": [{ "name": "Paru-paru", "emoji": "🫁" }, { "name": "Jantung", "emoji": "❤️" }, { "name": "Otak", "emoji": "🧠" }, { "name": "Tulang", "emoji": "🦴" }] },
+    { "id": "jantung", "prompt": "Organ yang memompa darah ke seluruh tubuh adalah...", "answer": "Jantung", "choices": [{ "name": "Lambung", "emoji": "🫃" }, { "name": "Jantung", "emoji": "❤️" }, { "name": "Paru-paru", "emoji": "🫁" }, { "name": "Ginjal", "emoji": "🫘" }] },
+    { "id": "otak", "prompt": "Organ yang mengatur pikiran dan banyak fungsi tubuh adalah...", "answer": "Otak", "choices": [{ "name": "Hati", "emoji": "🫀" }, { "name": "Otak", "emoji": "🧠" }, { "name": "Usus", "emoji": "〰️" }, { "name": "Tulang", "emoji": "🦴" }] },
+    { "id": "lambung", "prompt": "Organ yang membantu mencerna makanan adalah...", "answer": "Lambung", "choices": [{ "name": "Lambung", "emoji": "🫃" }, { "name": "Otak", "emoji": "🧠" }, { "name": "Jantung", "emoji": "❤️" }, { "name": "Paru-paru", "emoji": "🫁" }] },
+    { "id": "mata", "prompt": "Organ untuk melihat adalah...", "answer": "Mata", "choices": [{ "name": "Telinga", "emoji": "👂" }, { "name": "Mata", "emoji": "👁️" }, { "name": "Hidung", "emoji": "👃" }, { "name": "Lidah", "emoji": "👅" }] },
+    { "id": "telinga", "prompt": "Organ yang menerima suara dan membantu pendengaran adalah...", "answer": "Telinga", "choices": [{ "name": "Mata", "emoji": "👁️" }, { "name": "Telinga", "emoji": "👂" }, { "name": "Kulit", "emoji": "✋" }, { "name": "Hidung", "emoji": "👃" }] },
+    { "id": "hidung", "prompt": "Organ yang membantu kita mencium bau adalah...", "answer": "Hidung", "choices": [{ "name": "Hidung", "emoji": "👃" }, { "name": "Telinga", "emoji": "👂" }, { "name": "Mata", "emoji": "👁️" }, { "name": "Jantung", "emoji": "❤️" }] },
+    { "id": "kulit", "prompt": "Organ terbesar tubuh yang juga menerima sentuhan adalah...", "answer": "Kulit", "choices": [{ "name": "Kulit", "emoji": "✋" }, { "name": "Lambung", "emoji": "🫃" }, { "name": "Paru-paru", "emoji": "🫁" }, { "name": "Otak", "emoji": "🧠" }] },
+    { "id": "ginjal", "prompt": "Organ yang membantu menyaring darah dan membentuk urine adalah...", "answer": "Ginjal", "choices": [{ "name": "Jantung", "emoji": "❤️" }, { "name": "Ginjal", "emoji": "🫘" }, { "name": "Mata", "emoji": "👁️" }, { "name": "Telinga", "emoji": "👂" }] },
+    { "id": "tulang", "prompt": "Bagian tubuh yang menopang dan melindungi organ adalah...", "answer": "Tulang", "choices": [{ "name": "Otot", "emoji": "💪" }, { "name": "Tulang", "emoji": "🦴" }, { "name": "Kulit", "emoji": "✋" }, { "name": "Darah", "emoji": "🩸" }] }
   ],
   "tebakBendera": [
-    {
-      "id": "bendera-jepang",
-      "prompt": "🇯🇵",
-      "answer": "Jepang",
-      "choices": ["Jepang", "Korea Selatan", "Bangladesh", "Vietnam"]
-    }
+    { "id": "bendera-jepang", "prompt": "🇯🇵", "answer": "Jepang", "choices": ["Jepang", "Korea Selatan", "Bangladesh", "Vietnam"] },
+    { "id": "bendera-indonesia", "prompt": "🇮🇩", "answer": "Indonesia", "choices": ["Polandia", "Indonesia", "Monako", "Singapura"] },
+    { "id": "bendera-brasil", "prompt": "🇧🇷", "answer": "Brasil", "choices": ["Brasil", "Portugal", "Argentina", "Meksiko"] },
+    { "id": "bendera-kanada", "prompt": "🇨🇦", "answer": "Kanada", "choices": ["Austria", "Denmark", "Kanada", "Peru"] },
+    { "id": "bendera-prancis", "prompt": "🇫🇷", "answer": "Prancis", "choices": ["Italia", "Prancis", "Irlandia", "Belgia"] },
+    { "id": "bendera-jerman", "prompt": "🇩🇪", "answer": "Jerman", "choices": ["Belanda", "Jerman", "Rusia", "Yaman"] },
+    { "id": "bendera-australia", "prompt": "🇦🇺", "answer": "Australia", "choices": ["Selandia Baru", "Fiji", "Australia", "Britania Raya"] },
+    { "id": "bendera-mesir", "prompt": "🇪🇬", "answer": "Mesir", "choices": ["Mesir", "Irak", "Suriah", "Yordania"] },
+    { "id": "bendera-korea-selatan", "prompt": "🇰🇷", "answer": "Korea Selatan", "choices": ["Korea Selatan", "Jepang", "Tiongkok", "Thailand"] },
+    { "id": "bendera-meksiko", "prompt": "🇲🇽", "answer": "Meksiko", "choices": ["Italia", "Hungaria", "Meksiko", "Bulgaria"] }
   ],
   "eksperimenKimia": {
-    "prompt": "Buat satu molekul air. Pilih dua atom H dan satu atom O.",
-    "answer": ["H", "H", "O"],
-    "elements": ["H", "O", "Na", "C", "H", "Cl", "H", "O"]
+    "questions": [
+      { "id": "molekul-air", "prompt": "Buat satu molekul air (H₂O).", "formula": "H₂O", "answer": ["H", "H", "O"], "elements": ["H", "O", "Na", "C", "H", "Cl", "H", "O"] },
+      { "id": "molekul-karbon-dioksida", "prompt": "Buat satu molekul karbon dioksida (CO₂).", "formula": "CO₂", "answer": ["C", "O", "O"], "elements": ["O", "C", "Na", "O", "H", "Cl", "O"] },
+      { "id": "molekul-oksigen", "prompt": "Buat satu molekul oksigen (O₂).", "formula": "O₂", "answer": ["O", "O"], "elements": ["O", "H", "Na", "O", "C", "Cl"] },
+      { "id": "molekul-nitrogen", "prompt": "Buat satu molekul nitrogen (N₂).", "formula": "N₂", "answer": ["N", "N"], "elements": ["N", "O", "H", "N", "C", "Na"] },
+      { "id": "molekul-metana", "prompt": "Buat satu molekul metana (CH₄).", "formula": "CH₄", "answer": ["C", "H", "H", "H", "H"], "elements": ["H", "C", "O", "H", "Na", "H", "H", "Cl"] },
+      { "id": "molekul-amonia", "prompt": "Buat satu molekul amonia (NH₃).", "formula": "NH₃", "answer": ["N", "H", "H", "H"], "elements": ["H", "N", "O", "H", "Na", "H", "Cl"] },
+      { "id": "molekul-garam", "prompt": "Susun satu unit natrium klorida (NaCl).", "formula": "NaCl", "answer": ["Na", "Cl"], "elements": ["Cl", "Na", "H", "O", "Na", "C"] },
+      { "id": "molekul-karbon-monoksida", "prompt": "Buat satu molekul karbon monoksida (CO).", "formula": "CO", "answer": ["C", "O"], "elements": ["O", "C", "H", "Na", "Cl", "O"] },
+      { "id": "molekul-hidrogen", "prompt": "Buat satu molekul hidrogen (H₂).", "formula": "H₂", "answer": ["H", "H"], "elements": ["H", "O", "Na", "H", "C", "Cl"] },
+      { "id": "molekul-sulfur-dioksida", "prompt": "Buat satu molekul sulfur dioksida (SO₂).", "formula": "SO₂", "answer": ["S", "O", "O"], "elements": ["O", "S", "Na", "O", "H", "Cl", "C"] }
+    ]
   },
   "wujudZat": {
+    "choices": ["Padat", "Cair", "Gas"],
     "items": [
-      { "name": "Es batu", "emoji": "🧊", "answer": "Padat" },
-      { "name": "Air minum", "emoji": "💧", "answer": "Cair" },
-      { "name": "Uap air", "emoji": "♨️", "answer": "Gas" }
-    ],
-    "choices": ["Padat", "Cair", "Gas"]
+      { "id": "es-batu", "name": "Es batu", "emoji": "🧊", "answer": "Padat" },
+      { "id": "air-minum", "name": "Air minum", "emoji": "💧", "answer": "Cair" },
+      { "id": "uap-air", "name": "Uap air", "emoji": "♨️", "answer": "Gas" },
+      { "id": "batu", "name": "Batu", "emoji": "🪨", "answer": "Padat" },
+      { "id": "minyak", "name": "Minyak goreng", "emoji": "🫗", "answer": "Cair" },
+      { "id": "oksigen", "name": "Oksigen di udara", "emoji": "💨", "answer": "Gas" },
+      { "id": "kayu", "name": "Balok kayu", "emoji": "🪵", "answer": "Padat" },
+      { "id": "susu", "name": "Susu", "emoji": "🥛", "answer": "Cair" },
+      { "id": "helium", "name": "Helium dalam balon", "emoji": "🎈", "answer": "Gas" },
+      { "id": "garam", "name": "Garam dapur", "emoji": "🧂", "answer": "Padat" }
+    ]
   },
   "tebakLandmark": [
-    {
-      "id": "candi-borobudur",
-      "prompt": "🏯",
-      "question": "Landmark apakah ini?",
-      "answer": "Candi Borobudur",
-      "choices": ["Candi Borobudur", "Menara Eiffel", "Taj Mahal", "Colosseum"]
+    { "id": "candi-borobudur", "prompt": "🏯", "question": "Landmark apakah yang terkenal sebagai candi Buddha di Magelang?", "answer": "Candi Borobudur", "choices": ["Candi Borobudur", "Menara Eiffel", "Taj Mahal", "Colosseum"] },
+    { "id": "menara-eiffel", "prompt": "🗼", "question": "Landmark apakah yang menjadi ikon kota Paris?", "answer": "Menara Eiffel", "choices": ["Big Ben", "Menara Eiffel", "Patung Liberty", "Menara Pisa"] },
+    { "id": "taj-mahal", "prompt": "🕌", "question": "Mausoleum marmer putih terkenal di Agra, India adalah...", "answer": "Taj Mahal", "choices": ["Taj Mahal", "Colosseum", "Petra", "Candi Borobudur"] },
+    { "id": "colosseum", "prompt": "🏟️", "question": "Amfiteater Romawi kuno yang terkenal di Italia adalah...", "answer": "Colosseum", "choices": ["Acropolis", "Colosseum", "Stonehenge", "Taj Mahal"] },
+    { "id": "patung-liberty", "prompt": "🗽", "question": "Patung ikonik yang berdiri di New York adalah...", "answer": "Patung Liberty", "choices": ["Patung Liberty", "Christ the Redeemer", "Moai", "Big Ben"] },
+    { "id": "big-ben", "prompt": "🕰️", "question": "Menara jam terkenal di London dikenal sebagai...", "answer": "Big Ben", "choices": ["Big Ben", "Menara Pisa", "Menara Eiffel", "Colosseum"] },
+    { "id": "piramida-giza", "prompt": "🔺", "question": "Kompleks piramida kuno terkenal berada di...", "answer": "Giza", "choices": ["Giza", "Athena", "Roma", "Kyoto"] },
+    { "id": "opera-sydney", "prompt": "🎭", "question": "Gedung beratap seperti layar kapal di Australia adalah...", "answer": "Gedung Opera Sydney", "choices": ["Gedung Opera Sydney", "Taj Mahal", "Big Ben", "Petra"] },
+    { "id": "candi-prambanan", "prompt": "🛕", "question": "Kompleks candi Hindu besar di dekat Yogyakarta adalah...", "answer": "Candi Prambanan", "choices": ["Candi Prambanan", "Candi Borobudur", "Angkor Wat", "Pagoda Shwedagon"] },
+    { "id": "christ-redeemer", "prompt": "⛰️", "question": "Patung Yesus besar yang menghadap Rio de Janeiro adalah...", "answer": "Christ the Redeemer", "choices": ["Christ the Redeemer", "Patung Liberty", "Moai", "David"]
     }
   ]
 }
