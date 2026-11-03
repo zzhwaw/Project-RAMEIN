@@ -11,6 +11,27 @@ export function GamePanel({ eyebrow, title, prompt, children }) {
   );
 }
 
+export function QuestionProgress({ current, total }) {
+  return (
+    <div className="question-progress" aria-label={`Soal ${current} dari ${total}`}>
+      <div className="question-progress-track">
+        <span style={{ width: `${(current / total) * 100}%` }} />
+      </div>
+      <strong>SOAL {current} / {total}</strong>
+    </div>
+  );
+}
+
+export function QuestionsComplete({ correctAnswers, total }) {
+  return (
+    <div className="questions-complete" role="status">
+      <span aria-hidden="true">🎉</span>
+      <strong>Semua soal selesai!</strong>
+      <p>Jawaban benar: {correctAnswers} dari {total}</p>
+    </div>
+  );
+}
+
 export function ChoiceGrid({ choices, onChoose, className = '' }) {
   return (
     <div className={`mini-game-choices ${className}`}>

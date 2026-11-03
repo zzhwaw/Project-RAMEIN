@@ -50,6 +50,21 @@ function broadcastRoom(room) {
   io.to(room.id).emit('room:updated', getRoomSnapshot(room));
 }
 
+function calculateRoundScore(correctAnswers, remainingRatio) {
+  if (correctAnswers <= 0) return 0;
+  return Math.round((correctAnswers / 10) * (1000 + 500 * Math.max(0, Math.min(1, remainingRatio))));
+}
+
+function isValidQuestionProgress(payload) {
+  return payload.totalQuestions === 10
+    && Number.isInteger(payload.correctAnswers)
+    && Number.isInteger(payload.answeredQuestions)
+    && payload.answeredQuestions >= 0
+    && payload.answeredQuestions <= 10
+    && payload.correctAnswers >= 0
+    && payload.correctAnswers <= payload.answeredQuestions;
+}
+
 function finishGame(room, reason) {
   if (room.phase !== 'playing') return;
 
@@ -113,7 +128,16 @@ io.on('connection', (socket) => {
 
     removePlayer(socket);
     const roomId = createRoomId();
-    const player = { id: socket.id, name: playerName, isHost: true, ready: false, score: 0, answered: false };
+    const player = {
+      id: socket.id,
+      name: playerName,
+      isHost: true,
+      ready: false,
+      score: 0,
+      answered: false,
+      correctAnswers: 0,
+      answeredQuestions: 0,
+    };
     const room = {
       id: roomId,
       name: roomName,
@@ -157,7 +181,16 @@ io.on('connection', (socket) => {
     }
 
     removePlayer(socket);
-    const player = { id: socket.id, name: playerName, isHost: false, ready: false, score: 0, answered: false };
+    const player = {
+      id: socket.id,
+      name: playerName,
+      isHost: false,
+      ready: false,
+      score: 0,
+      answered: false,
+      correctAnswers: 0,
+      answeredQuestions: 0,
+    };
     room.players.set(socket.id, player);
     socket.data.roomId = room.id;
     socket.join(room.id);
@@ -220,6 +253,8 @@ io.on('connection', (socket) => {
     room.players.forEach((player) => {
       player.score = 0;
       player.answered = false;
+      player.correctAnswers = 0;
+      player.answeredQuestions = 0;
     });
 
     const game = { ...room.game };
@@ -227,6 +262,33 @@ io.on('connection', (socket) => {
     broadcastRoom(room);
     room.gameTimeout = setTimeout(() => finishGame(room, 'time-up'), GAME_DURATION_MS);
     callback({ game });
+  });
+
+  socket.on('game:progress', (payload = {}, callback = () => {}) => {
+    const room = rooms.get(socket.data.roomId);
+    const player = room?.players.get(socket.id);
+    if (!room || !player || room.phase !== 'playing' || !room.game) {
+      callback({ error: 'Tidak ada game aktif untuk diperbarui.' });
+      return;
+    }
+    if (payload.roundId !== room.game.roundId || player.answered) {
+      callback({ error: 'Progress ini bukan untuk ronde aktif.' });
+      return;
+    }
+    if (!isValidQuestionProgress(payload)
+      || payload.answeredQuestions !== player.answeredQuestions + 1
+      || payload.correctAnswers < player.correctAnswers
+      || payload.correctAnswers > player.correctAnswers + 1) {
+      callback({ error: 'Progress soal tidak valid.' });
+      return;
+    }
+
+    player.correctAnswers = payload.correctAnswers;
+    player.answeredQuestions = payload.answeredQuestions;
+    const remainingRatio = Math.max(0, (room.game.endsAt - Date.now()) / (room.game.duration * 1000));
+    player.score = calculateRoundScore(player.correctAnswers, remainingRatio);
+    broadcastRoom(room);
+    callback({ ok: true, score: player.score });
   });
 
   socket.on('game:answer', (payload = {}, callback = () => {}) => {
@@ -250,12 +312,20 @@ io.on('connection', (socket) => {
       return;
     }
 
-    const score = Number(payload.score);
-    if (!Number.isFinite(score) || score < 0) {
-      callback({ error: 'Skor jawaban tidak valid.' });
+    if (!isValidQuestionProgress(payload)
+      || payload.answeredQuestions !== player.answeredQuestions
+      || payload.correctAnswers !== player.correctAnswers) {
+      callback({ error: 'Progress jawaban tidak valid.' });
       return;
     }
-    player.score = Math.min(1500, Math.round(score));
+    if (Date.now() < room.game.endsAt && payload.answeredQuestions !== 10) {
+      callback({ error: 'Selesaikan semua 10 soal sebelum mengirim skor akhir.' });
+      return;
+    }
+    player.correctAnswers = payload.correctAnswers;
+    player.answeredQuestions = payload.answeredQuestions;
+    const remainingRatio = Math.max(0, (room.game.endsAt - Date.now()) / (room.game.duration * 1000));
+    player.score = calculateRoundScore(player.correctAnswers, remainingRatio);
     player.answered = true;
     broadcastRoom(room);
     callback({ ok: true, score: player.score });

@@ -1,24 +1,32 @@
 import { useMemo, useState } from 'react';
 import questions from './gameQuestions.json';
-import { GamePanel } from './MiniGameUI';
+import { GamePanel, QuestionProgress, QuestionsComplete } from './MiniGameUI';
 import { seededShuffle } from './gameUtils';
+import useQuestionProgress from './useQuestionProgress';
 
 export default function SusunTataSurya({ onAnswer, randomSeed = 1 }) {
-  const planets = useMemo(
-    () => seededShuffle(questions.susunTataSurya.planets, randomSeed),
-    [randomSeed],
-  );
   const [nextPlanetIndex, setNextPlanetIndex] = useState(0);
+  const { questionIndex, answerQuestion, isComplete, correctAnswers } = useQuestionProgress(
+    questions.susunTataSurya.questions.length,
+    onAnswer,
+  );
+  const currentQuestion = questions.susunTataSurya.questions[questionIndex];
+  const planets = useMemo(
+    () => seededShuffle(currentQuestion.planets, randomSeed + questionIndex),
+    [currentQuestion, questionIndex, randomSeed],
+  );
 
   const selectPlanet = (planet) => {
     const expectedPlanet = [...planets].sort((first, second) => first.distance - second.distance)[nextPlanetIndex];
     if (planet.name !== expectedPlanet.name) {
-      onAnswer(false);
+      answerQuestion(false);
+      setNextPlanetIndex(0);
       return;
     }
 
     if (nextPlanetIndex + 1 === planets.length) {
-      onAnswer(true);
+      answerQuestion(true);
+      setNextPlanetIndex(0);
       return;
     }
 
@@ -31,27 +39,34 @@ export default function SusunTataSurya({ onAnswer, randomSeed = 1 }) {
       title="Susun Tata Surya"
       prompt={questions.susunTataSurya.prompt}
     >
-      <div className="solar-progress" aria-live="polite">
-        {Array.from({ length: planets.length }, (_, index) => (
-          <span className={index < nextPlanetIndex ? 'solar-step solar-step-done' : 'solar-step'} key={index}>
-            {index < nextPlanetIndex ? '✓' : index + 1}
-          </span>
-        ))}
-      </div>
-      <div className="planet-grid">
-        {planets.map((planet) => (
-          <button
-            className="planet-choice"
-            key={planet.name}
-            type="button"
-            onClick={() => selectPlanet(planet)}
-            aria-label={planet.name}
-          >
-            <span aria-hidden="true">{planet.emoji}</span>
-            <strong>{planet.name}</strong>
-          </button>
-        ))}
-      </div>
+      {isComplete ? (
+        <QuestionsComplete correctAnswers={correctAnswers} total={questions.susunTataSurya.questions.length} />
+      ) : (
+        <>
+          <QuestionProgress current={questionIndex + 1} total={questions.susunTataSurya.questions.length} />
+          <div className="solar-progress" aria-live="polite">
+            {Array.from({ length: planets.length }, (_, index) => (
+              <span className={index < nextPlanetIndex ? 'solar-step solar-step-done' : 'solar-step'} key={index}>
+                {index < nextPlanetIndex ? '✓' : index + 1}
+              </span>
+            ))}
+          </div>
+          <div className="planet-grid">
+            {planets.map((planet) => (
+              <button
+                className="planet-choice"
+                key={planet.name}
+                type="button"
+                onClick={() => selectPlanet(planet)}
+                aria-label={planet.name}
+              >
+                <span aria-hidden="true">{planet.emoji}</span>
+                <strong>{planet.name}</strong>
+              </button>
+            ))}
+          </div>
+        </>
+      )}
     </GamePanel>
   );
 }
