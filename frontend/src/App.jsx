@@ -6,6 +6,7 @@ import CreateRoomPage from './components/CreateRoomPage';
 import JoinRoomPage from './components/JoinRoomPage';
 import LobbyPage from './components/LobbyPage';
 import GameArena from './components/GameArena';
+import ScoreboardPage from './components/ScoreboardPage';
 
 const PAGE_TRANSITION_MS = 700;
 
@@ -14,6 +15,7 @@ export default function App() {
   const [navigation, setNavigation] = useState(null);
   const [room, setRoom] = useState(null);
   const [game, setGame] = useState(null);
+  const [finalStandings, setFinalStandings] = useState(null);
   const [timeLeft, setTimeLeft] = useState(0);
   const [lobbyOrigin, setLobbyOrigin] = useState('create');
   const [socket] = useState(() => io(import.meta.env.VITE_SOCKET_URL || 'http://localhost:3001', {
@@ -29,13 +31,18 @@ export default function App() {
         clientClockOffset: startedGame.serverNow - Date.now(),
       };
       setGame(synchronizedGame);
+      setFinalStandings(null);
       setTimeLeft(Math.max(0, (startedGame.endsAt - Date.now() - synchronizedGame.clientClockOffset) / 1000));
       setPage('game');
     };
-    const handleGameEnded = ({ room: updatedRoom }) => {
+    const handleGameEnded = ({ room: updatedRoom, reason }) => {
       setRoom(updatedRoom);
       setGame(null);
-      setPage('lobby');
+      setFinalStandings({
+        players: updatedRoom.players,
+        reason,
+      });
+      setPage('scoreboard');
     };
 
     socket.on('room:updated', handleRoomUpdate);
@@ -212,6 +219,14 @@ export default function App() {
           timeLeft={timeLeft}
           roundDuration={game.duration}
           onAnswer={handleGameAnswer}
+        />
+      )}
+      {page === 'scoreboard' && finalStandings && (
+        <ScoreboardPage
+          roomName={room?.name}
+          players={finalStandings.players}
+          reason={finalStandings.reason}
+          onContinue={() => setPage('lobby')}
         />
       )}
     </div>
