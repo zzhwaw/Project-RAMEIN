@@ -9,6 +9,7 @@ export default function ScoreboardPage({ roomName, players = [], reason, onConti
     (Number(second.score) || 0) - (Number(first.score) || 0)
     || (first.name || '').localeCompare(second.name || '')
   ));
+  const winner = ranking[0];
 
   const resultMessage = reason === 'time-up'
     ? 'Waktu habis! Ini hasil akhir ronde.'
@@ -30,6 +31,23 @@ export default function ScoreboardPage({ roomName, players = [], reason, onConti
         <h1 id="scoreboard-title">Papan Juara</h1>
         <p className="scoreboard-description">{resultMessage}</p>
 
+        {winner && (
+          <section className="scoreboard-winner" aria-label={`Juara satu: ${winner.name || 'Pemain'}`}>
+            <span className="scoreboard-winner-crown" aria-hidden="true">👑</span>
+            <span className="scoreboard-winner-avatar" aria-hidden="true">
+              {winner.name?.slice(0, 1).toUpperCase() || '?'}
+            </span>
+            <span className="scoreboard-winner-label">JUARA 1</span>
+            <strong className="scoreboard-winner-name">{winner.name || 'Pemain'}</strong>
+            <span className="scoreboard-winner-score">{Number(winner.score) || 0} poin</span>
+            <span className="scoreboard-winner-breakdown">
+              {Number(winner.correctAnswers) || 0}/10 benar
+              <span aria-hidden="true"> · </span>
+              +{Number(winner.speedBonus) || 0} poin cepat
+            </span>
+          </section>
+        )}
+
         <ol className="scoreboard-list" aria-label="Peringkat pemain">
           {ranking.map((player, index) => {
             const rank = index + 1;
@@ -46,6 +64,9 @@ export default function ScoreboardPage({ roomName, players = [], reason, onConti
                 <span className="scoreboard-player-info">
                   <strong>{player.name || 'Pemain'}</strong>
                   <small>{rank === 1 ? 'JUARA 1' : `JUARA ${rank}`}{player.isHost ? ' · HOST' : ''}</small>
+                  <small className="scoreboard-player-bonus">
+                    {Number(player.correctAnswers) || 0}/10 benar · +{Number(player.speedBonus) || 0} poin cepat
+                  </small>
                 </span>
                 <span className="scoreboard-player-score">{Number(player.score) || 0}<small> POIN</small></span>
               </li>

@@ -61,6 +61,23 @@
 .game-arena-timer strong { font-size: 1.2rem; }
 .game-arena-timer small { font-size: 0.72rem; }
 
+.game-arena-score {
+  min-width: 88px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border: 3px solid var(--arena-ink);
+  border-radius: 14px;
+  background: #b7eead;
+  box-shadow: 4px 4px 0 var(--arena-ink);
+}
+
+.game-arena-score span { font-size: 1rem; }
+.game-arena-score strong { font-size: 1.1rem; }
+.game-arena-score small { font-size: 0.68rem; }
+
 .game-arena-body {
   width: min(100%, 760px);
   min-width: 0;
@@ -81,6 +98,72 @@
   font-size: 0.76rem;
   font-weight: 900;
   letter-spacing: 1.2px;
+}
+
+.game-live-scores {
+  width: min(100%, 680px);
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0 0 18px;
+}
+
+.game-live-player {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 19px 30px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 8px;
+  border: 2px solid var(--arena-ink);
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 2px 2px 0 var(--arena-ink);
+}
+
+.game-live-player-you {
+  background: #fff0ae;
+  box-shadow: 3px 3px 0 var(--arena-ink);
+}
+
+.game-live-rank {
+  color: #777080;
+  font-size: 0.72rem;
+  font-weight: 900;
+  text-align: center;
+}
+
+.game-live-avatar {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border: 2px solid var(--arena-ink);
+  border-radius: 9px;
+  background: #ff72c6;
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+.game-live-player:nth-child(2) .game-live-avatar { background: #4fc4ff; }
+.game-live-player:nth-child(3) .game-live-avatar { background: #73cf85; }
+.game-live-player:nth-child(4) .game-live-avatar { background: #f4c834; color: var(--arena-ink); }
+.game-live-player:nth-child(5) .game-live-avatar { background: #ed6a61; }
+.game-live-player:nth-child(6) .game-live-avatar { background: #7466b4; }
+
+.game-live-player-name {
+  min-width: 0;
+  overflow: hidden;
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.game-live-player-score {
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
 }
 
 .mini-game-panel,
@@ -580,8 +663,13 @@ touch-action: manipulation; }
 
   .game-arena-topbar { gap: 10px; }
   .game-arena-timer { min-width: 78px; padding: 7px 10px; }
+  .game-arena-score { min-width: 75px; padding: 7px 9px; }
   .game-arena-body { justify-content: flex-start; padding: 24px 0 18px; }
   .game-arena-round { font-size: 0.68rem; }
+  .game-live-scores { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; }
+  .game-live-player { grid-template-columns: 16px 27px minmax(0, 1fr) auto; gap: 5px; padding: 6px; }
+  .game-live-avatar { width: 26px; height: 26px; }
+  .game-live-player-name, .game-live-player-score { font-size: 0.72rem; }
   .mini-game-panel {
     padding: 20px 16px;
     border-radius: 20px;
@@ -612,6 +700,11 @@ touch-action: manipulation; }
   }
 
   .mini-game-panel { padding: 18px 13px; }
+  .game-arena-score { min-width: 0; gap: 4px; padding: 7px; }
+  .game-arena-score small { display: none; }
+  .game-live-player { grid-template-columns: 14px 24px minmax(0, 1fr) auto; gap: 4px; padding: 5px; }
+  .game-live-avatar { width: 23px; height: 23px; font-size: 0.68rem; }
+  .game-live-player-name, .game-live-player-score { font-size: 0.66rem; }
   .mini-game-choices { grid-template-columns: minmax(0, 1fr); }
   .fact-myth-actions { gap: 9px; }
   .answer-button { min-height: 50px; font-size: 0.92rem; }

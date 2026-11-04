@@ -17,6 +17,9 @@ const rooms = new Map();
 const MIN_PLAYERS = 3;
 const MAX_PLAYERS = 6;
 const GAME_DURATION_MS = 45_000;
+const QUESTION_BASE_POINTS = 100;
+const MAX_SPEED_BONUS = 50;
+const SPEED_BONUS_WINDOW_MS = 5_000;
 
 function cleanText(value, maxLength) {
   return typeof value === 'string'
@@ -50,9 +53,9 @@ function broadcastRoom(room) {
   io.to(room.id).emit('room:updated', getRoomSnapshot(room));
 }
 
-function calculateRoundScore(correctAnswers, remainingRatio) {
-  if (correctAnswers <= 0) return 0;
-  return Math.round((correctAnswers / 10) * (1000 + 500 * Math.max(0, Math.min(1, remainingRatio))));
+function calculateSpeedBonus(answerTimeMs) {
+  const speedRatio = Math.max(0, 1 - Math.max(0, answerTimeMs) / SPEED_BONUS_WINDOW_MS);
+  return Math.round(MAX_SPEED_BONUS * speedRatio);
 }
 
 function isValidQuestionProgress(payload) {
@@ -134,6 +137,8 @@ io.on('connection', (socket) => {
       isHost: true,
       ready: false,
       score: 0,
+      baseScore: 0,
+      speedBonus: 0,
       answered: false,
       correctAnswers: 0,
       answeredQuestions: 0,
@@ -187,6 +192,8 @@ io.on('connection', (socket) => {
       isHost: false,
       ready: false,
       score: 0,
+      baseScore: 0,
+      speedBonus: 0,
       answered: false,
       correctAnswers: 0,
       answeredQuestions: 0,
@@ -252,9 +259,12 @@ io.on('connection', (socket) => {
     };
     room.players.forEach((player) => {
       player.score = 0;
+      player.baseScore = 0;
+      player.speedBonus = 0;
       player.answered = false;
       player.correctAnswers = 0;
       player.answeredQuestions = 0;
+      player.lastAnswerAt = now;
     });
 
     const game = { ...room.game };
@@ -271,6 +281,11 @@ io.on('connection', (socket) => {
       callback({ error: 'Tidak ada game aktif untuk diperbarui.' });
       return;
     }
+    if (Date.now() >= room.game.endsAt) {
+      finishGame(room, 'time-up');
+      callback({ error: 'Waktu permainan sudah habis.' });
+      return;
+    }
     if (payload.roundId !== room.game.roundId || player.answered) {
       callback({ error: 'Progress ini bukan untuk ronde aktif.' });
       return;
@@ -283,12 +298,25 @@ io.on('connection', (socket) => {
       return;
     }
 
+    const now = Date.now();
+    const correctAnswerDelta = payload.correctAnswers - player.correctAnswers;
+    const questionSpeedBonus = correctAnswerDelta
+      ? calculateSpeedBonus(now - player.lastAnswerAt)
+      : 0;
     player.correctAnswers = payload.correctAnswers;
     player.answeredQuestions = payload.answeredQuestions;
-    const remainingRatio = Math.max(0, (room.game.endsAt - Date.now()) / (room.game.duration * 1000));
-    player.score = calculateRoundScore(player.correctAnswers, remainingRatio);
+    player.baseScore += correctAnswerDelta * QUESTION_BASE_POINTS;
+    player.speedBonus += questionSpeedBonus;
+    player.score = player.baseScore + player.speedBonus;
+    player.lastAnswerAt = now;
     broadcastRoom(room);
-    callback({ ok: true, score: player.score });
+    callback({
+      ok: true,
+      score: player.score,
+      baseScore: player.baseScore,
+      speedBonus: player.speedBonus,
+      questionSpeedBonus,
+    });
   });
 
   socket.on('game:answer', (payload = {}, callback = () => {}) => {
@@ -324,8 +352,6 @@ io.on('connection', (socket) => {
     }
     player.correctAnswers = payload.correctAnswers;
     player.answeredQuestions = payload.answeredQuestions;
-    const remainingRatio = Math.max(0, (room.game.endsAt - Date.now()) / (room.game.duration * 1000));
-    player.score = calculateRoundScore(player.correctAnswers, remainingRatio);
     player.answered = true;
     broadcastRoom(room);
     callback({ ok: true, score: player.score });
