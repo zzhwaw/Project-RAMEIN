@@ -125,9 +125,9 @@ export default function App() {
 
   const handleSetReady = (ready) => requestRoom('player:ready', { ready });
   const handleStartGame = () => requestRoom('game:start', {});
-  const handleGameAnswer = (score, progress) => {
+  const handleGameAnswer = (progress) => {
     if (!game) return;
-    socket.emit('game:answer', { roundId: game.roundId, reportedScore: score, ...progress });
+    socket.emit('game:answer', { roundId: game.roundId, ...progress });
   };
   const handleGameProgress = (progress) => {
     if (!game) return;
@@ -221,7 +221,9 @@ export default function App() {
           gameId={game.id}
           roundId={game.roundId}
           timeLeft={timeLeft}
-          roundDuration={game.duration}
+          players={room?.players || []}
+          currentPlayerId={socket.id}
+          score={room?.players.find((player) => player.id === socket.id)?.score || 0}
           onAnswer={handleGameAnswer}
           onProgress={handleGameProgress}
         />
