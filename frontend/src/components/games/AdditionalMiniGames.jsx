@@ -4,7 +4,7 @@ import { ChoiceGrid, GamePanel, QuestionProgress, QuestionsComplete } from './Mi
 import { seededShuffle } from './gameUtils';
 import useQuestionProgress from './useQuestionProgress';
 
-export function TebakPenemu({ onAnswer }) {
+export function TebakPenemu({ onAnswer, difficulty = 'medium' }) {
   const { questionIndex, answerQuestion, isComplete, correctAnswers } = useQuestionProgress(
     questions.tebakPenemu.length,
     onAnswer,
@@ -19,32 +19,41 @@ export function TebakPenemu({ onAnswer }) {
         <>
           <QuestionProgress current={questionIndex + 1} total={questions.tebakPenemu.length} />
           <div className="invention-icon" role="img" aria-label="Ikon penemuan">{question.icon}</div>
-          <ChoiceGrid choices={question.choices} onChoose={(choice) => answerQuestion(choice === question.answer)} />
+          <ChoiceGrid
+            choices={question.choices}
+            correctChoice={question.answer}
+            difficulty={difficulty}
+            onChoose={(choice) => answerQuestion(choice === question.answer)}
+          />
         </>
       )}
     </GamePanel>
   );
 }
 
-export function RantaiMakanan({ onAnswer, randomSeed = 1 }) {
+export function RantaiMakanan({ onAnswer, randomSeed = 1, difficulty = 'medium' }) {
   const { questionIndex, answerQuestion, isComplete, correctAnswers } = useQuestionProgress(
     questions.rantaiMakanan.questions.length,
     onAnswer,
   );
   const question = questions.rantaiMakanan.questions[questionIndex];
+  const activeChain = useMemo(
+    () => (difficulty === 'easy' ? question.chain.slice(0, 2) : question.chain),
+    [difficulty, question.chain],
+  );
   const [step, setStep] = useState(0);
   const shuffledItems = useMemo(() => {
-    const items = question.chain.map((name, index) => ({ name, emoji: question.emoji[index] }));
+    const items = activeChain.map((name, index) => ({ name, emoji: question.emoji[index] }));
     return seededShuffle(items, randomSeed + questionIndex);
-  }, [question, questionIndex, randomSeed]);
+  }, [activeChain, question.emoji, questionIndex, randomSeed]);
 
   const selectFood = (food) => {
-    if (food.name !== question.chain[step]) {
+    if (food.name !== activeChain[step]) {
       answerQuestion(false);
       setStep(0);
       return;
     }
-    if (step + 1 === question.chain.length) {
+    if (step + 1 === activeChain.length) {
       answerQuestion(true);
       setStep(0);
       return;
@@ -60,7 +69,7 @@ export function RantaiMakanan({ onAnswer, randomSeed = 1 }) {
         <>
           <QuestionProgress current={questionIndex + 1} total={questions.rantaiMakanan.questions.length} />
           <div className="food-chain-progress" aria-live="polite">
-            {question.chain.map((name, index) => (
+            {activeChain.map((name, index) => (
               <span className={index < step ? 'food-chain-step food-chain-step-done' : 'food-chain-step'} key={name}>
                 {index < step ? `${question.emoji[index]} ${name}` : `? ${index + 1}`}
               </span>
@@ -80,7 +89,7 @@ export function RantaiMakanan({ onAnswer, randomSeed = 1 }) {
   );
 }
 
-export function AnatomiTubuh({ onAnswer }) {
+export function AnatomiTubuh({ onAnswer, difficulty = 'medium' }) {
   const { questionIndex, answerQuestion, isComplete, correctAnswers } = useQuestionProgress(
     questions.anatomiTubuh.length,
     onAnswer,
@@ -95,7 +104,13 @@ export function AnatomiTubuh({ onAnswer }) {
         <>
           <QuestionProgress current={questionIndex + 1} total={questions.anatomiTubuh.length} />
           <div className="mini-game-choices anatomy-grid">
-            {question.choices.map((organ) => (
+            {question.choices
+              .filter((organ, index) => (
+                difficulty === 'hard'
+                || organ.name === question.answer
+                || index < (difficulty === 'easy' ? 1 : 2)
+              ))
+              .map((organ) => (
               <button
                 className="mini-game-choice anatomy-choice"
                 key={organ.name}
@@ -113,7 +128,7 @@ export function AnatomiTubuh({ onAnswer }) {
   );
 }
 
-export function TebakBendera({ onAnswer }) {
+export function TebakBendera({ onAnswer, difficulty = 'medium' }) {
   const { questionIndex, answerQuestion, isComplete, correctAnswers } = useQuestionProgress(
     questions.tebakBendera.length,
     onAnswer,
@@ -130,24 +145,36 @@ export function TebakBendera({ onAnswer }) {
           <div className="flag-question" role="img" aria-label={`Bendera ${question.answer}`}>
             {question.prompt}
           </div>
-          <ChoiceGrid choices={question.choices} onChoose={(choice) => answerQuestion(choice === question.answer)} />
+          <ChoiceGrid
+            choices={question.choices}
+            correctChoice={question.answer}
+            difficulty={difficulty}
+            onChoose={(choice) => answerQuestion(choice === question.answer)}
+          />
         </>
       )}
     </GamePanel>
   );
 }
 
-export function EksperimenKimia({ onAnswer, randomSeed = 1 }) {
+export function EksperimenKimia({ onAnswer, randomSeed = 1, difficulty = 'medium' }) {
   const { questionIndex, answerQuestion, isComplete, correctAnswers } = useQuestionProgress(
     questions.eksperimenKimia.questions.length,
     onAnswer,
   );
   const question = questions.eksperimenKimia.questions[questionIndex];
   const [selectedAtoms, setSelectedAtoms] = useState([]);
+  const availableElements = useMemo(() => {
+    if (difficulty === 'hard') return question.elements;
+    const requiredElements = question.elements.filter((symbol) => question.answer.includes(symbol));
+    if (difficulty === 'easy') return requiredElements;
+    const decoy = question.elements.find((symbol) => !question.answer.includes(symbol));
+    return decoy ? [...requiredElements, decoy] : requiredElements;
+  }, [difficulty, question]);
   const atomOrder = useMemo(() => seededShuffle(
-    question.elements.map((symbol, index) => ({ symbol, id: `${question.id}-${index}` })),
+    availableElements.map((symbol, index) => ({ symbol, id: `${question.id}-${index}` })),
     randomSeed + questionIndex,
-  ), [question, questionIndex, randomSeed]);
+  ), [availableElements, question.id, questionIndex, randomSeed]);
 
   const selectAtom = (atom) => {
     const expectedSymbol = question.answer[selectedAtoms.length];
@@ -180,7 +207,7 @@ export function EksperimenKimia({ onAnswer, randomSeed = 1 }) {
               </span>
             ))}
           </div>
-          <div className="element-cloud">
+          <div className={`element-cloud element-cloud-${difficulty}`}>
             {atomOrder.map((atom, index) => (
               <button
                 className="element-chip"
@@ -200,7 +227,7 @@ export function EksperimenKimia({ onAnswer, randomSeed = 1 }) {
   );
 }
 
-export function WujudZat({ onAnswer }) {
+export function WujudZat({ onAnswer, difficulty = 'medium' }) {
   const { questionIndex, answerQuestion, isComplete, correctAnswers } = useQuestionProgress(
     questions.wujudZat.items.length,
     onAnswer,
@@ -219,11 +246,14 @@ export function WujudZat({ onAnswer }) {
             <strong>{item.name}</strong>
           </div>
           <div className="matter-actions">
-            {questions.wujudZat.choices.map((state) => (
+            {(difficulty === 'hard'
+              ? questions.wujudZat.choices
+              : [item.answer, ...questions.wujudZat.choices.filter((state) => state !== item.answer)].slice(0, difficulty === 'easy' ? 2 : 3)
+            ).map((state) => (
               <button className="matter-choice" key={state} type="button" onClick={() => answerQuestion(state === item.answer)}>
                 {state}
               </button>
-            ))}
+              ))}
           </div>
         </>
       )}
@@ -231,7 +261,7 @@ export function WujudZat({ onAnswer }) {
   );
 }
 
-export function TebakLandmark({ onAnswer }) {
+export function TebakLandmark({ onAnswer, difficulty = 'medium' }) {
   const { questionIndex, answerQuestion, isComplete, correctAnswers } = useQuestionProgress(
     questions.tebakLandmark.length,
     onAnswer,
@@ -248,7 +278,12 @@ export function TebakLandmark({ onAnswer }) {
           <div className="landmark-question" role="img" aria-label={`Ilustrasi landmark ${question.answer}`}>
             <span>{question.prompt}</span>
           </div>
-          <ChoiceGrid choices={question.choices} onChoose={(choice) => answerQuestion(choice === question.answer)} />
+          <ChoiceGrid
+            choices={question.choices}
+            correctChoice={question.answer}
+            difficulty={difficulty}
+            onChoose={(choice) => answerQuestion(choice === question.answer)}
+          />
         </>
       )}
     </GamePanel>

@@ -12,37 +12,47 @@ import {
   TebakPenemu,
   WujudZat,
 } from './games/AdditionalMiniGames';
+import {
+  MenghitungCepatQuiz,
+  TebakGambarQuiz,
+  TebakPengetahuanQuiz,
+} from './games/ModeQuizSamples';
+import { getQuizName, QUIZ_MODES } from './games/quizCatalog';
 
-const GAME_COMPONENTS = {
-  1: TebakPeta,
-  2: FaktaMitos,
-  3: SusunTataSurya,
-  4: TebakPenemu,
-  5: RantaiMakanan,
-  6: AnatomiTubuh,
-  7: TebakBendera,
-  8: EksperimenKimia,
-  9: WujudZat,
-  10: TebakLandmark,
-};
-
-const GAME_NAMES = {
-  1: 'Tebak Peta',
-  2: 'Fakta atau Mitos',
-  3: 'Susun Tata Surya',
-  4: 'Tebak Penemu',
-  5: 'Rantai Makanan',
-  6: 'Anatomi Tubuh',
-  7: 'Tebak Bendera',
-  8: 'Eksperimen Kimia',
-  9: 'Wujud Zat',
-  10: 'Tebak Landmark',
+const QUIZ_COMPONENTS = {
+  gambar: {
+    1: TebakPeta,
+    2: TebakBendera,
+    3: TebakLandmark,
+    4: TebakGambarQuiz,
+    5: TebakGambarQuiz,
+    6: TebakGambarQuiz,
+    7: TebakGambarQuiz,
+    8: TebakGambarQuiz,
+    9: TebakGambarQuiz,
+    10: TebakGambarQuiz,
+  },
+  pengetahuan: {
+    1: TebakPengetahuanQuiz,
+    2: FaktaMitos,
+    3: SusunTataSurya,
+    4: TebakPenemu,
+    5: RantaiMakanan,
+    6: AnatomiTubuh,
+    7: EksperimenKimia,
+    8: WujudZat,
+    9: TebakPengetahuanQuiz,
+    10: TebakPengetahuanQuiz,
+  },
+  hitung: Object.fromEntries(Array.from({ length: 10 }, (_, index) => [index + 1, MenghitungCepatQuiz])),
 };
 
 const TOTAL_QUESTIONS = 10;
 
 export default function GameArena({
-  gameId,
+  activeMode,
+  quizId,
+  difficulty = 'medium',
   roundId,
   timeLeft,
   onAnswer,
@@ -54,7 +64,8 @@ export default function GameArena({
   const [result, setResult] = useState(null);
   const [answeredQuestions, setAnsweredQuestions] = useState(0);
   const submission = useRef({ roundId, submitted: false, correctAnswers: 0, answeredQuestions: 0 });
-  const GameComponent = GAME_COMPONENTS[gameId];
+  const GameComponent = QUIZ_COMPONENTS[activeMode]?.[quizId];
+  const quizName = getQuizName(activeMode, quizId);
   const displayedTime = Number.isFinite(timeLeft) ? Math.max(0, Math.ceil(timeLeft)) : '--';
   const displayedScore = Number.isFinite(Number(score)) ? Number(score) : 0;
   const visibleResult = result?.roundId === roundId ? result : null;
@@ -100,8 +111,8 @@ export default function GameArena({
     return (
       <main className="game-arena">
         <section className="game-arena-card">
-          <h1>Game tidak ditemukan</h1>
-          <p>Pilih game dengan ID antara 1 sampai 10.</p>
+          <h1>Kuis tidak ditemukan</h1>
+          <p>Mode harus gambar, pengetahuan, atau hitung dengan ID kuis 1 sampai 10.</p>
         </section>
       </main>
     );
@@ -124,7 +135,9 @@ export default function GameArena({
       </div>
 
       <div className="game-arena-body">
-        <div className="game-arena-round">MINI GAME {gameId} / 10</div>
+        <div className="game-arena-round">
+          {QUIZ_MODES[activeMode].label.toUpperCase()} • {difficulty.toUpperCase()} • KUIS {quizId} / 10
+        </div>
         {players.length > 0 && (
           <section className="game-live-scores" aria-label="Skor pemain saat ini">
             {[...players]
@@ -148,11 +161,13 @@ export default function GameArena({
         )}
         {!visibleResult && (
           <GameComponent
-            key={roundId}
+            key={`${roundId}-${activeMode}-${quizId}`}
             onAnswer={submitQuestionAnswer}
-            randomSeed={Array.from(roundId || String(gameId)).reduce(
+            quizId={quizId}
+            difficulty={difficulty}
+            randomSeed={Array.from(roundId || `${activeMode}-${quizId}`).reduce(
               (seed, character) => (seed * 31 + character.charCodeAt(0)) >>> 0,
-              gameId >>> 0,
+              quizId >>> 0,
             )}
           />
         )}
@@ -169,7 +184,7 @@ export default function GameArena({
           </p>
         )}
       </div>
-      <p className="game-arena-caption">{GAME_NAMES[gameId]} • Ilmu Pengetahuan & Pengetahuan Umum</p>
+      <p className="game-arena-caption">{quizName} • Mode {QUIZ_MODES[activeMode].label}</p>
     </main>
   );
 }

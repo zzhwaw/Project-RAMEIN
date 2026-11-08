@@ -2,7 +2,7 @@ import questions from './gameQuestions.json';
 import { GamePanel, QuestionProgress, QuestionsComplete } from './MiniGameUI';
 import useQuestionProgress from './useQuestionProgress';
 
-export default function FaktaMitos({ onAnswer }) {
+export default function FaktaMitos({ onAnswer, difficulty = 'medium' }) {
   const { questionIndex, answerQuestion, isComplete, correctAnswers } = useQuestionProgress(questions.faktaMitos.length, onAnswer);
   const question = questions.faktaMitos[questionIndex];
 
@@ -17,8 +17,8 @@ export default function FaktaMitos({ onAnswer }) {
       ) : (
         <>
           <QuestionProgress current={questionIndex + 1} total={questions.faktaMitos.length} />
-          <div className="science-statement">
-            <span aria-hidden="true">🔬</span>
+          <div className={`science-statement science-statement-${difficulty}`}>
+            <span aria-hidden="true">{difficulty === 'easy' ? '🔎' : difficulty === 'hard' ? '🧪' : '🔬'}</span>
             <p>{question.statement}</p>
           </div>
           <div className="fact-myth-actions">

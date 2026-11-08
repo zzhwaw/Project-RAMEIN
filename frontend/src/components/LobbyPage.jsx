@@ -20,6 +20,7 @@ export default function LobbyPage({
   const roomPlayers = room?.players || players;
   const minimumPlayers = room?.minPlayers || 3;
   const displayedRoomCode = room?.id || roomCode || '------';
+  const difficultyLabels = { easy: 'EASY', medium: 'MEDIUM', hard: 'HARD' };
   const currentPlayer = roomPlayers.find((player) => player.id === currentPlayerId);
   const isHost = currentPlayer?.isHost || room?.hostId === currentPlayerId;
   const readyPlayersCount = roomPlayers.filter((player) => player.ready).length;
@@ -77,6 +78,11 @@ export default function LobbyPage({
               </svg>
             </button>
           </div>
+          {room?.difficulty && (
+            <span className="lobby-difficulty-badge">
+              LEVEL {difficultyLabels[room.difficulty] || 'MEDIUM'}
+            </span>
+          )}
           {copyMessage && <span className="copy-room-id-status" role="status">{copyMessage}</span>}
         </div>
         <button className="btn-lobby-back" onClick={leaveLobby} aria-label="Keluar dari lobby">

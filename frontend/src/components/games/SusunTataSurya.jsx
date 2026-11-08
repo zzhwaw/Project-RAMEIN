@@ -4,16 +4,20 @@ import { GamePanel, QuestionProgress, QuestionsComplete } from './MiniGameUI';
 import { seededShuffle } from './gameUtils';
 import useQuestionProgress from './useQuestionProgress';
 
-export default function SusunTataSurya({ onAnswer, randomSeed = 1 }) {
+export default function SusunTataSurya({ onAnswer, randomSeed = 1, difficulty = 'medium' }) {
   const [nextPlanetIndex, setNextPlanetIndex] = useState(0);
   const { questionIndex, answerQuestion, isComplete, correctAnswers } = useQuestionProgress(
     questions.susunTataSurya.questions.length,
     onAnswer,
   );
   const currentQuestion = questions.susunTataSurya.questions[questionIndex];
+  const planetCount = difficulty === 'easy' ? 2 : difficulty === 'hard' ? 4 : 3;
   const planets = useMemo(
-    () => seededShuffle(currentQuestion.planets, randomSeed + questionIndex),
-    [currentQuestion, questionIndex, randomSeed],
+    () => seededShuffle(
+      [...currentQuestion.planets].sort((first, second) => first.distance - second.distance).slice(0, planetCount),
+      randomSeed + questionIndex,
+    ),
+    [currentQuestion, planetCount, questionIndex, randomSeed],
   );
 
   const selectPlanet = (planet) => {
