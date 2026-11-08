@@ -16,7 +16,9 @@ const io = new Server(server, {
 const rooms = new Map();
 const MIN_PLAYERS = 3;
 const MAX_PLAYERS = 6;
-const GAME_DURATION_MS = 45_000;
+const GAME_DURATION_MS = { easy: 60_000, medium: 45_000, hard: 30_000 };
+const GAME_MODES = ['gambar', 'pengetahuan', 'hitung'];
+const GAME_DIFFICULTIES = ['easy', 'medium', 'hard'];
 const QUESTION_BASE_POINTS = 100;
 const MAX_SPEED_BONUS = 50;
 const SPEED_BONUS_WINDOW_MS = 5_000;
@@ -41,6 +43,7 @@ function getRoomSnapshot(room) {
     name: room.name,
     hostId: room.hostId,
     capacity: room.capacity,
+    difficulty: room.difficulty,
     phase: room.phase,
     game: room.game,
     players: Array.from(room.players.values()),
@@ -119,6 +122,7 @@ io.on('connection', (socket) => {
     const playerName = cleanText(payload.playerName, 24);
     const roomName = cleanText(payload.roomName, 30);
     const capacity = Number(payload.capacity);
+    const difficulty = payload.difficulty ?? 'medium';
 
     if (!playerName || !roomName) {
       callback({ error: 'Nama pemain dan nama room harus diisi.' });
@@ -126,6 +130,10 @@ io.on('connection', (socket) => {
     }
     if (!Number.isInteger(capacity) || capacity < MIN_PLAYERS || capacity > MAX_PLAYERS) {
       callback({ error: `Kapasitas room harus ${MIN_PLAYERS}-${MAX_PLAYERS} pemain.` });
+      return;
+    }
+    if (!GAME_DIFFICULTIES.includes(difficulty)) {
+      callback({ error: 'Pilih tingkat kesulitan easy, medium, atau hard.' });
       return;
     }
 
@@ -148,6 +156,7 @@ io.on('connection', (socket) => {
       name: roomName,
       hostId: socket.id,
       capacity,
+      difficulty,
       phase: 'lobby',
       game: null,
       players: new Map([[socket.id, player]]),
@@ -248,14 +257,20 @@ io.on('connection', (socket) => {
     }
 
     const now = Date.now();
+    const durationMs = GAME_DURATION_MS[room.difficulty];
+    const activeMode = GAME_MODES[randomInt(0, GAME_MODES.length)];
+    const quizId = randomInt(1, 11);
     room.phase = 'playing';
     room.game = {
-      id: randomInt(1, 11),
+      activeMode,
+      quizId,
+      difficulty: room.difficulty,
+      id: quizId,
       roundId: `${room.id}-${now}`,
       startedAt: now,
       serverNow: now,
-      endsAt: now + GAME_DURATION_MS,
-      duration: GAME_DURATION_MS / 1000,
+      endsAt: now + durationMs,
+      duration: durationMs / 1000,
     };
     room.players.forEach((player) => {
       player.score = 0;
@@ -270,7 +285,7 @@ io.on('connection', (socket) => {
     const game = { ...room.game };
     io.to(room.id).emit('game:started', game);
     broadcastRoom(room);
-    room.gameTimeout = setTimeout(() => finishGame(room, 'time-up'), GAME_DURATION_MS);
+    room.gameTimeout = setTimeout(() => finishGame(room, 'time-up'), durationMs);
     callback({ game });
   });
 

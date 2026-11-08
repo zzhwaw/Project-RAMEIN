@@ -218,7 +218,9 @@ export default function App() {
       {page === 'game' && game && (
         <GameArena
           key={game.roundId}
-          gameId={game.id}
+          activeMode={game.activeMode}
+          quizId={game.quizId}
+          difficulty={game.difficulty || room?.difficulty || 'medium'}
           roundId={game.roundId}
           timeLeft={timeLeft}
           players={room?.players || []}

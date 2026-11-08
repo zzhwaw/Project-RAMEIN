@@ -32,10 +32,15 @@ export function QuestionsComplete({ correctAnswers, total }) {
   );
 }
 
-export function ChoiceGrid({ choices, onChoose, className = '' }) {
+export function ChoiceGrid({ choices, onChoose, className = '', correctChoice, difficulty = 'medium' }) {
+  const choiceCount = difficulty === 'easy' ? 2 : difficulty === 'hard' ? choices.length : 3;
+  const visibleChoices = correctChoice === undefined
+    ? choices.slice(0, choiceCount)
+    : [correctChoice, ...choices.filter((choice) => choice !== correctChoice)].slice(0, choiceCount);
+
   return (
     <div className={`mini-game-choices ${className}`}>
-      {choices.map((choice, index) => (
+      {visibleChoices.map((choice, index) => (
         <button
           className="mini-game-choice"
           key={typeof choice === 'string' ? choice : choice.name}

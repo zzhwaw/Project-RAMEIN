@@ -4,6 +4,7 @@ export default function CreateRoomPage({ className = '', onBack, onCreateRoom })
   const [roomName, setRoomName] = useState('');
   const [playerName, setPlayerName] = useState('');
   const [capacity, setCapacity] = useState('6');
+  const [difficulty, setDifficulty] = useState('medium');
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -15,6 +16,7 @@ export default function CreateRoomPage({ className = '', onBack, onCreateRoom })
       roomName,
       playerName,
       capacity: Number(capacity),
+      difficulty,
     });
     if (result.error) setError(result.error);
     setIsSubmitting(false);
@@ -73,6 +75,18 @@ export default function CreateRoomPage({ className = '', onBack, onCreateRoom })
               <option value="4">4 pemain</option>
               <option value="5">5 pemain</option>
               <option value="6">6 pemain</option>
+            </select>
+
+            <label htmlFor="game-difficulty">Tingkat kesulitan</label>
+            <select
+              id="game-difficulty"
+              name="difficulty"
+              value={difficulty}
+              onChange={(event) => setDifficulty(event.target.value)}
+            >
+              <option value="easy">Easy — cocok untuk pemanasan</option>
+              <option value="medium">Medium — tantangan seimbang</option>
+              <option value="hard">Hard — tantangan maksimal</option>
             </select>
 
             {error && <p className="room-form-error" role="alert">{error}</p>}

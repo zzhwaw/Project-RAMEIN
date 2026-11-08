@@ -2,7 +2,7 @@ import questions from './gameQuestions.json';
 import { ChoiceGrid, GamePanel, QuestionProgress, QuestionsComplete } from './MiniGameUI';
 import useQuestionProgress from './useQuestionProgress';
 
-export default function TebakPeta({ onAnswer }) {
+export default function TebakPeta({ onAnswer, difficulty = 'medium' }) {
   const { questionIndex, answerQuestion, isComplete, correctAnswers } = useQuestionProgress(questions.tebakPeta.length, onAnswer);
   const question = questions.tebakPeta[questionIndex];
 
@@ -25,6 +25,8 @@ export default function TebakPeta({ onAnswer }) {
           </div>
           <ChoiceGrid
             choices={question.choices}
+            correctChoice={question.answer}
+            difficulty={difficulty}
             onChoose={(choice) => answerQuestion(choice === question.answer)}
           />
         </>
