@@ -6,6 +6,7 @@ import CreateRoomPage from './components/CreateRoomPage';
 import JoinRoomPage from './components/JoinRoomPage';
 import LobbyPage from './components/LobbyPage';
 import GameArena from './components/GameArena';
+import DrawAndGuess from './components/DrawAndGuess';
 import ModeReveal from './components/ModeReveal';
 import ScoreboardPage from './components/ScoreboardPage';
 
@@ -38,12 +39,13 @@ export default function App() {
       setTimeLeft(Math.max(0, (startedGame.endsAt - Math.max(clientNow, playStartsAt)) / 1000));
       setPage('modeReveal');
     };
-    const handleGameEnded = ({ room: updatedRoom, reason }) => {
+    const handleGameEnded = ({ room: updatedRoom, reason, game: endedGame }) => {
       setRoom(updatedRoom);
       setGame(null);
       setFinalStandings({
         players: updatedRoom.players,
         reason,
+        mode: endedGame?.activeMode,
       });
       setPage('scoreboard');
     };
@@ -231,25 +233,37 @@ export default function App() {
         />
       )}
       {page === 'game' && game && (
-        <GameArena
-          key={game.roundId}
-          activeMode={game.activeMode}
-          quizId={game.quizId}
-          difficulty={game.difficulty || room?.difficulty || 'medium'}
-          roundId={game.roundId}
-          timeLeft={timeLeft}
-          players={room?.players || []}
-          currentPlayerId={socket.id}
-          score={room?.players.find((player) => player.id === socket.id)?.score || 0}
-          onAnswer={handleGameAnswer}
-          onProgress={handleGameProgress}
-        />
+        game.activeMode === 'gambar-tebak' ? (
+          <DrawAndGuess
+            key={game.roundId}
+            socket={socket}
+            game={game}
+            timeLeft={timeLeft}
+            players={room?.players || []}
+            currentPlayerId={socket.id}
+          />
+        ) : (
+          <GameArena
+            key={game.roundId}
+            activeMode={game.activeMode}
+            quizId={game.quizId}
+            difficulty={game.difficulty || room?.difficulty || 'medium'}
+            roundId={game.roundId}
+            timeLeft={timeLeft}
+            players={room?.players || []}
+            currentPlayerId={socket.id}
+            score={room?.players.find((player) => player.id === socket.id)?.score || 0}
+            onAnswer={handleGameAnswer}
+            onProgress={handleGameProgress}
+          />
+        )
       )}
       {page === 'scoreboard' && finalStandings && (
         <ScoreboardPage
           roomName={room?.name}
           players={finalStandings.players}
           reason={finalStandings.reason}
+          mode={finalStandings.mode}
           onContinue={() => setPage('lobby')}
         />
       )}
