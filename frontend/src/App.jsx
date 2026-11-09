@@ -6,6 +6,7 @@ import CreateRoomPage from './components/CreateRoomPage';
 import JoinRoomPage from './components/JoinRoomPage';
 import LobbyPage from './components/LobbyPage';
 import GameArena from './components/GameArena';
+import ModeReveal from './components/ModeReveal';
 import ScoreboardPage from './components/ScoreboardPage';
 
 const PAGE_TRANSITION_MS = 700;
@@ -32,8 +33,10 @@ export default function App() {
       };
       setGame(synchronizedGame);
       setFinalStandings(null);
-      setTimeLeft(Math.max(0, (startedGame.endsAt - Date.now() - synchronizedGame.clientClockOffset) / 1000));
-      setPage('game');
+      const clientNow = Date.now() + synchronizedGame.clientClockOffset;
+      const playStartsAt = startedGame.playStartsAt || startedGame.startedAt;
+      setTimeLeft(Math.max(0, (startedGame.endsAt - Math.max(clientNow, playStartsAt)) / 1000));
+      setPage('modeReveal');
     };
     const handleGameEnded = ({ room: updatedRoom, reason }) => {
       setRoom(updatedRoom);
@@ -63,7 +66,8 @@ export default function App() {
 
     const updateTimeLeft = () => {
       const clientNow = Date.now() + game.clientClockOffset;
-      setTimeLeft(Math.max(0, (game.endsAt - clientNow) / 1000));
+      const playStartsAt = game.playStartsAt || game.startedAt;
+      setTimeLeft(Math.max(0, (game.endsAt - Math.max(clientNow, playStartsAt)) / 1000));
     };
     updateTimeLeft();
     const timerId = window.setInterval(updateTimeLeft, 100);
@@ -132,6 +136,10 @@ export default function App() {
   const handleGameProgress = (progress) => {
     if (!game) return;
     socket.emit('game:progress', { roundId: game.roundId, ...progress });
+  };
+  const handleModeRevealComplete = (selectedMode) => {
+    if (game?.activeMode !== selectedMode) return;
+    setPage('game');
   };
 
   const navigateWithSlide = (target, from = page, onComplete) => {
@@ -213,6 +221,13 @@ export default function App() {
           onLeave={handleLeaveRoom}
           onSetReady={handleSetReady}
           onStartGame={handleStartGame}
+        />
+      )}
+      {page === 'modeReveal' && game && (
+        <ModeReveal
+          key={game.roundId}
+          selectedMode={game.activeMode}
+          onComplete={handleModeRevealComplete}
         />
       )}
       {page === 'game' && game && (
