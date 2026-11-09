@@ -16,6 +16,7 @@ const io = new Server(server, {
 const rooms = new Map();
 const MIN_PLAYERS = 3;
 const MAX_PLAYERS = 6;
+const MODE_REVEAL_DURATION_MS = 5_000;
 const GAME_DURATION_MS = { easy: 60_000, medium: 45_000, hard: 30_000 };
 const GAME_MODES = ['gambar', 'pengetahuan', 'hitung'];
 const GAME_DIFFICULTIES = ['easy', 'medium', 'hard'];
@@ -267,9 +268,10 @@ io.on('connection', (socket) => {
       difficulty: room.difficulty,
       id: quizId,
       roundId: `${room.id}-${now}`,
-      startedAt: now,
+      startedAt: now + MODE_REVEAL_DURATION_MS,
+      playStartsAt: now + MODE_REVEAL_DURATION_MS,
       serverNow: now,
-      endsAt: now + durationMs,
+      endsAt: now + MODE_REVEAL_DURATION_MS + durationMs,
       duration: durationMs / 1000,
     };
     room.players.forEach((player) => {
@@ -279,13 +281,16 @@ io.on('connection', (socket) => {
       player.answered = false;
       player.correctAnswers = 0;
       player.answeredQuestions = 0;
-      player.lastAnswerAt = now;
+      player.lastAnswerAt = room.game.playStartsAt;
     });
 
     const game = { ...room.game };
     io.to(room.id).emit('game:started', game);
     broadcastRoom(room);
-    room.gameTimeout = setTimeout(() => finishGame(room, 'time-up'), durationMs);
+    room.gameTimeout = setTimeout(
+      () => finishGame(room, 'time-up'),
+      MODE_REVEAL_DURATION_MS + durationMs,
+    );
     callback({ game });
   });
 
@@ -299,6 +304,10 @@ io.on('connection', (socket) => {
     if (Date.now() >= room.game.endsAt) {
       finishGame(room, 'time-up');
       callback({ error: 'Waktu permainan sudah habis.' });
+      return;
+    }
+    if (Date.now() < room.game.playStartsAt) {
+      callback({ error: 'Tunggu sampai pengundian mode selesai.' });
       return;
     }
     if (payload.roundId !== room.game.roundId || player.answered) {
@@ -352,6 +361,10 @@ io.on('connection', (socket) => {
     if (Date.now() >= room.game.endsAt) {
       finishGame(room, 'time-up');
       callback({ error: 'Waktu permainan sudah habis.' });
+      return;
+    }
+    if (Date.now() < room.game.playStartsAt) {
+      callback({ error: 'Tunggu sampai pengundian mode selesai.' });
       return;
     }
 
