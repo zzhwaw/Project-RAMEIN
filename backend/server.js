@@ -17,7 +17,8 @@ const rooms = new Map();
 const MIN_PLAYERS = 3;
 const MAX_PLAYERS = 6;
 const MODE_REVEAL_DURATION_MS = 5_000;
-const GAME_DURATION_MS = { easy: 60_000, medium: 45_000, hard: 30_000 };
+const TOTAL_QUESTIONS = 20;
+const GAME_DURATION_MS = { easy: 120_000, medium: 90_000, hard: 60_000 };
 const GAME_MODES = ['gambar', 'pengetahuan', 'hitung'];
 const GAME_DIFFICULTIES = ['easy', 'medium', 'hard'];
 const QUESTION_BASE_POINTS = 100;
@@ -62,12 +63,12 @@ function calculateSpeedBonus(answerTimeMs) {
   return Math.round(MAX_SPEED_BONUS * speedRatio);
 }
 
-function isValidQuestionProgress(payload) {
-  return payload.totalQuestions === 10
+function isValidQuestionProgress(payload, totalQuestions = TOTAL_QUESTIONS) {
+  return payload.totalQuestions === totalQuestions
     && Number.isInteger(payload.correctAnswers)
     && Number.isInteger(payload.answeredQuestions)
     && payload.answeredQuestions >= 0
-    && payload.answeredQuestions <= 10
+    && payload.answeredQuestions <= totalQuestions
     && payload.correctAnswers >= 0
     && payload.correctAnswers <= payload.answeredQuestions;
 }
@@ -266,6 +267,7 @@ io.on('connection', (socket) => {
       activeMode,
       quizId,
       difficulty: room.difficulty,
+      totalQuestions: TOTAL_QUESTIONS,
       id: quizId,
       roundId: `${room.id}-${now}`,
       startedAt: now + MODE_REVEAL_DURATION_MS,
@@ -314,7 +316,7 @@ io.on('connection', (socket) => {
       callback({ error: 'Progress ini bukan untuk ronde aktif.' });
       return;
     }
-    if (!isValidQuestionProgress(payload)
+    if (!isValidQuestionProgress(payload, room.game.totalQuestions)
       || payload.answeredQuestions !== player.answeredQuestions + 1
       || payload.correctAnswers < player.correctAnswers
       || payload.correctAnswers > player.correctAnswers + 1) {
@@ -368,14 +370,14 @@ io.on('connection', (socket) => {
       return;
     }
 
-    if (!isValidQuestionProgress(payload)
+    if (!isValidQuestionProgress(payload, room.game.totalQuestions)
       || payload.answeredQuestions !== player.answeredQuestions
       || payload.correctAnswers !== player.correctAnswers) {
       callback({ error: 'Progress jawaban tidak valid.' });
       return;
     }
-    if (Date.now() < room.game.endsAt && payload.answeredQuestions !== 10) {
-      callback({ error: 'Selesaikan semua 10 soal sebelum mengirim skor akhir.' });
+    if (Date.now() < room.game.endsAt && payload.answeredQuestions !== room.game.totalQuestions) {
+      callback({ error: `Selesaikan semua ${room.game.totalQuestions} soal sebelum mengirim skor akhir.` });
       return;
     }
     player.correctAnswers = payload.correctAnswers;

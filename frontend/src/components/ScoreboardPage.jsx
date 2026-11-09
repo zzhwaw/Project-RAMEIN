@@ -3,6 +3,7 @@ const podiumStyles = {
   2: 'score-rank-second',
   3: 'score-rank-third',
 };
+const TOTAL_QUESTIONS = 20;
 
 export default function ScoreboardPage({ roomName, players = [], reason, onContinue }) {
   const ranking = [...players].sort((first, second) => (
@@ -41,7 +42,7 @@ export default function ScoreboardPage({ roomName, players = [], reason, onConti
             <strong className="scoreboard-winner-name">{winner.name || 'Pemain'}</strong>
             <span className="scoreboard-winner-score">{Number(winner.score) || 0} poin</span>
             <span className="scoreboard-winner-breakdown">
-              {Number(winner.correctAnswers) || 0}/10 benar
+              {Number(winner.correctAnswers) || 0}/{TOTAL_QUESTIONS} benar
               <span aria-hidden="true"> · </span>
               +{Number(winner.speedBonus) || 0} poin cepat
             </span>
@@ -65,7 +66,7 @@ export default function ScoreboardPage({ roomName, players = [], reason, onConti
                   <strong>{player.name || 'Pemain'}</strong>
                   <small>{rank === 1 ? 'JUARA 1' : `JUARA ${rank}`}{player.isHost ? ' · HOST' : ''}</small>
                   <small className="scoreboard-player-bonus">
-                    {Number(player.correctAnswers) || 0}/10 benar · +{Number(player.speedBonus) || 0} poin cepat
+                    {Number(player.correctAnswers) || 0}/{TOTAL_QUESTIONS} benar · +{Number(player.speedBonus) || 0} poin cepat
                   </small>
                 </span>
                 <span className="scoreboard-player-score">{Number(player.score) || 0}<small> POIN</small></span>
