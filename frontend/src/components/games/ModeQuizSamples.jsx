@@ -1,52 +1,35 @@
 import { useMemo } from 'react';
 import { ChoiceGrid, GamePanel, QuestionProgress, QuestionsComplete } from './MiniGameUI';
 import useQuestionProgress from './useQuestionProgress';
+import { seededShuffle } from './gameUtils';
 import { getQuizName } from './quizCatalog';
 
-const PICTURE_CATEGORIES = {
-  1: {
-    name: 'pulau dari petunjuk peta',
-    items: ['Papua 🏝️', 'Sumatra 🗺️', 'Jawa 🌋', 'Sulawesi 🐚', 'Bali 🌴', 'Lombok 🏖️', 'Kalimantan 🌳', 'Flores 🌺', 'Madura 🐂', 'Bangka ⛏️'],
-  },
-  2: {
-    name: 'bendera dunia',
-    items: ['Indonesia 🇮🇩', 'Jepang 🇯🇵', 'Brasil 🇧🇷', 'Kanada 🇨🇦', 'Italia 🇮🇹', 'Prancis 🇫🇷', 'Korea Selatan 🇰🇷', 'Jerman 🇩🇪', 'India 🇮🇳', 'Australia 🇦🇺'],
-  },
-  3: {
-    name: 'landmark dunia',
-    items: ['Menara Eiffel 🗼', 'Colosseum 🏛️', 'Taj Mahal 🕌', 'Big Ben 🕰️', 'Borobudur 🛕', 'Patung Liberty 🗽', 'Piramida Giza 🔺', 'Menara Pisa 🏰', 'Acropolis 🏛️', 'Tembok Besar 🧱'],
-  },
-  4: {
-    name: 'hewan dari siluet',
-    items: ['Harimau 🐅', 'Gajah 🐘', 'Jerapah 🦒', 'Panda 🐼', 'Zebra 🦓', 'Singa 🦁', 'Rubah 🦊', 'Kelinci 🐰', 'Koala 🐨', 'Kura-kura 🐢'],
-  },
-  5: {
-    name: 'buah dari potongan',
-    items: ['Pisang 🍌', 'Apel 🍎', 'Semangka 🍉', 'Nanas 🍍', 'Anggur 🍇', 'Mangga 🥭', 'Stroberi 🍓', 'Jeruk 🍊', 'Pir 🍐', 'Kelapa 🥥'],
-  },
-  6: {
-    name: 'benda dari zoom',
-    items: ['Kamera 📷', 'Jam ⏰', 'Sepeda 🚲', 'Kunci 🔑', 'Payung ☂️', 'Lampu 💡', 'Buku 📘', 'Telepon ☎️', 'Gunting ✂️', 'Kacamata 👓'],
-  },
-  7: {
-    name: 'profesi dari peralatan',
-    items: ['Dokter 🩺', 'Koki 👨‍🍳', 'Pilot 👨‍✈️', 'Petani 👩‍🌾', 'Pemadam kebakaran 🧑‍🚒', 'Pelukis 🎨', 'Astronaut 🧑‍🚀', 'Polisi 👮', 'Musisi 🎸', 'Guru 🧑‍🏫'],
-  },
-  8: {
-    name: 'planet dari ciri visual',
-    items: ['Merkurius 🪨', 'Venus 🟠', 'Bumi 🌍', 'Mars 🔴', 'Jupiter 🟤', 'Saturnus 🪐', 'Uranus 🩵', 'Neptunus 🔵', 'Matahari ☀️', 'Bulan 🌙'],
-  },
-  9: {
-    name: 'flora Nusantara',
-    items: ['Anggrek 🌸', 'Melati 🤍', 'Rafflesia 🌺', 'Bunga matahari 🌻', 'Mawar 🌹', 'Tulip 🌷', 'Kaktus 🌵', 'Semanggi ☘️', 'Pohon kelapa 🌴', 'Daun maple 🍁'],
-  },
-  10: {
-    name: 'logo dan simbol',
-    items: ['Hati ❤️', 'Bintang ⭐', 'Petir ⚡', 'Api 🔥', 'Salju ❄️', 'Tanda centang ✅', 'Tanda tanya ❓', 'Musik 🎵', 'Bulan sabit 🌙', 'Matahari ☀️'],
-  },
-};
+const TOTAL_QUESTIONS = 20;
 
-const KNOWLEDGE_QUESTIONS = [
+const PICTURE_QUESTIONS = [
+  { clue: '🏝️ 🗺️', prompt: 'Pulau terbesar di Indonesia bagian timur adalah...', answer: 'Papua', choices: ['Papua', 'Bali', 'Madura', 'Lombok'] },
+  { clue: '🗼 🇫🇷', prompt: 'Landmark ikonik di Paris ini bernama...', answer: 'Menara Eiffel', choices: ['Colosseum', 'Menara Eiffel', 'Big Ben', 'Taj Mahal'] },
+  { clue: '🐅 🌿', prompt: 'Hewan bercorak loreng ini adalah...', answer: 'Harimau', choices: ['Zebra', 'Harimau', 'Jerapah', 'Panda'] },
+  { clue: '🍌 🟡', prompt: 'Buah kuning melengkung ini adalah...', answer: 'Pisang', choices: ['Mangga', 'Lemon', 'Pisang', 'Nanas'] },
+  { clue: '🪐 💍', prompt: 'Planet yang terkenal dengan cincinnya adalah...', answer: 'Saturnus', choices: ['Mars', 'Venus', 'Saturnus', 'Merkurius'] },
+  { clue: '🦷 🪥', prompt: 'Benda pada gambar digunakan untuk membersihkan...', answer: 'Gigi', choices: ['Rambut', 'Gigi', 'Sepatu', 'Kacamata'] },
+  { clue: '🩺 👩‍⚕️', prompt: 'Profesi dengan peralatan ini adalah...', answer: 'Dokter', choices: ['Koki', 'Pilot', 'Dokter', 'Petani'] },
+  { clue: '🌻 ☀️', prompt: 'Bunga yang dikenal menghadap ke arah matahari adalah...', answer: 'Bunga matahari', choices: ['Mawar', 'Melati', 'Anggrek', 'Bunga matahari'] },
+  { clue: '🏛️ 🇮🇹', prompt: 'Bangunan bersejarah berbentuk arena di Roma adalah...', answer: 'Colosseum', choices: ['Parthenon', 'Colosseum', 'Acropolis', 'Stonehenge'] },
+  { clue: '🔴 ⚪', prompt: 'Kombinasi warna bendera Indonesia adalah...', answer: 'Merah dan putih', choices: ['Merah dan putih', 'Biru dan putih', 'Merah dan kuning', 'Hijau dan putih'] },
+  { clue: '🇯🇵 🔴', prompt: 'Bendera dengan lingkaran merah di tengah berlatar putih adalah...', answer: 'Jepang', choices: ['Jepang', 'Kanada', 'Turki', 'Denmark'] },
+  { clue: '🗽 🇺🇸', prompt: 'Patung terkenal yang menyambut pendatang di New York adalah...', answer: 'Patung Liberty', choices: ['Patung Liberty', 'Big Ben', 'Christ the Redeemer', 'Moai'] },
+  { clue: '🐘 🌳', prompt: 'Hewan besar dengan belalai panjang ini adalah...', answer: 'Gajah', choices: ['Badak', 'Gajah', 'Kuda nil', 'Tapir'] },
+  { clue: '🍍 🌴', prompt: 'Buah tropis berkulit kasar dan bermahkota daun adalah...', answer: 'Nanas', choices: ['Nanas', 'Durian', 'Pepaya', 'Melon'] },
+  { clue: '🛕 🇮🇩', prompt: 'Candi Buddha terbesar yang berada di Magelang adalah...', answer: 'Borobudur', choices: ['Borobudur', 'Prambanan', 'Mendut', 'Penataran'] },
+  { clue: '🐼 🎋', prompt: 'Hewan hitam putih yang suka makan bambu adalah...', answer: 'Panda', choices: ['Panda', 'Koala', 'Lemur', 'Beruang kutub'] },
+  { clue: '🌉 🇬🇧', prompt: 'Menara jam terkenal di London dikenal sebagai...', answer: 'Big Ben', choices: ['Big Ben', 'Menara Eiffel', 'Menara Pisa', 'Space Needle'] },
+  { clue: '🍓 ❤️', prompt: 'Buah merah kecil dengan biji di bagian luar adalah...', answer: 'Stroberi', choices: ['Ceri', 'Stroberi', 'Raspberry', 'Apel'] },
+  { clue: '🔺 🐫', prompt: 'Bangunan segitiga kuno di Mesir ini adalah...', answer: 'Piramida Giza', choices: ['Piramida Giza', 'Colosseum', 'Taj Mahal', 'Petra'] },
+  { clue: '🦒 🌳', prompt: 'Hewan dengan leher sangat panjang ini adalah...', answer: 'Jerapah', choices: ['Jerapah', 'Zebra', 'Unta', 'Rusa'] },
+];
+
+const GENERAL_KNOWLEDGE_QUESTIONS = [
   { prompt: 'Planet tempat kita tinggal adalah...', answer: 'Bumi', choices: ['Mars', 'Bumi', 'Venus', 'Jupiter'] },
   { prompt: 'Gas yang paling banyak terdapat di atmosfer Bumi adalah...', answer: 'Nitrogen', choices: ['Oksigen', 'Karbon dioksida', 'Nitrogen', 'Hidrogen'] },
   { prompt: 'Proses tumbuhan membuat makanan dengan bantuan cahaya disebut...', answer: 'Fotosintesis', choices: ['Fermentasi', 'Fotosintesis', 'Evaporasi', 'Respirasi'] },
@@ -85,25 +68,16 @@ const GEOGRAPHY_QUESTIONS = [
   { prompt: 'Danau Toba berada di provinsi...', answer: 'Sumatera Utara', choices: ['Sumatera Barat', 'Sumatera Utara', 'Riau', 'Aceh'] },
 ];
 
-function getDifficultyChoices(choices, answer, difficulty) {
+const KNOWLEDGE_QUESTIONS = [
+  ...GENERAL_KNOWLEDGE_QUESTIONS,
+  ...HISTORY_QUESTIONS,
+  ...GEOGRAPHY_QUESTIONS,
+];
+
+function getDifficultyChoices(choices, answer, difficulty, seed = 0) {
   const choiceCount = difficulty === 'easy' ? 2 : difficulty === 'hard' ? 4 : 3;
-  return [answer, ...choices.filter((choice) => choice !== answer)].slice(0, choiceCount);
-}
-
-function getPictureQuestion(quizId, index, difficulty) {
-  const category = PICTURE_CATEGORIES[quizId];
-  const items = category.items;
-  const answerItem = items[index];
-  const choices = [0, 3, 6, 8].map((offset) => items[(index + offset) % items.length]);
-  const answer = answerItem.replace(/\s+\S+$/u, '');
-  const plainChoices = choices.map((choice) => choice.replace(/\s+\S+$/u, ''));
-
-  return {
-    clue: answerItem.split(' ').at(-1),
-    prompt: `Nama ${category.name} apakah yang ditunjukkan?`,
-    answer,
-    choices: getDifficultyChoices(plainChoices, answer, difficulty),
-  };
+  const shuffledChoices = seededShuffle(choices.filter((choice) => choice !== answer), seed);
+  return seededShuffle([answer, ...shuffledChoices.slice(0, choiceCount - 1)], seed + 1);
 }
 
 function createMathQuestion(quizId, index, seed, difficulty) {
@@ -136,14 +110,19 @@ function createMathQuestion(quizId, index, seed, difficulty) {
 
   return {
     ...question,
-    choices: getDifficultyChoices([...choices.slice(shift), ...choices.slice(0, shift)], question.answer, difficulty),
+    choices: getDifficultyChoices([...choices.slice(shift), ...choices.slice(0, shift)], question.answer, difficulty, seed + index),
   };
 }
 
-export function TebakGambarQuiz({ onAnswer, quizId = 1, difficulty = 'medium' }) {
+export function TebakGambarQuiz({ onAnswer, quizId = 1, difficulty = 'medium', randomSeed = 1 }) {
   const questions = useMemo(
-    () => Array.from({ length: 10 }, (_, index) => getPictureQuestion(quizId, index, difficulty)),
-    [difficulty, quizId],
+    () => seededShuffle(PICTURE_QUESTIONS, randomSeed + quizId)
+      .slice(0, TOTAL_QUESTIONS)
+      .map((question, index) => ({
+        ...question,
+        choices: getDifficultyChoices(question.choices, question.answer, difficulty, randomSeed + index),
+      })),
+    [difficulty, quizId, randomSeed],
   );
   const { questionIndex, answerQuestion, isComplete, correctAnswers } = useQuestionProgress(questions.length, onAnswer);
   const question = questions[questionIndex];
@@ -151,7 +130,7 @@ export function TebakGambarQuiz({ onAnswer, quizId = 1, difficulty = 'medium' })
   return (
     <GamePanel
       eyebrow={`MODE TEBAK GAMBAR • ${String(quizId).padStart(2, '0')}`}
-      title={getQuizName('gambar', quizId) || 'Tebak Gambar'}
+      title="Tebak Gambar"
       prompt={question.prompt}
     >
       {isComplete ? (
@@ -172,27 +151,23 @@ export function TebakGambarQuiz({ onAnswer, quizId = 1, difficulty = 'medium' })
   );
 }
 
-export function TebakPengetahuanQuiz({ onAnswer, quizId = 1, difficulty = 'medium' }) {
-  const questionPool = quizId === 9
-    ? HISTORY_QUESTIONS
-    : quizId === 10
-      ? GEOGRAPHY_QUESTIONS
-      : quizId === 2
-        ? HISTORY_QUESTIONS
-        : quizId === 3
-          ? GEOGRAPHY_QUESTIONS
-          : KNOWLEDGE_QUESTIONS;
-  const questions = questionPool.map((question) => ({
-    ...question,
-    choices: getDifficultyChoices(question.choices, question.answer, difficulty),
-  }));
+export function TebakPengetahuanQuiz({ onAnswer, quizId = 1, difficulty = 'medium', randomSeed = 1 }) {
+  const questions = useMemo(
+    () => seededShuffle(KNOWLEDGE_QUESTIONS, randomSeed + quizId)
+      .slice(0, TOTAL_QUESTIONS)
+      .map((question, index) => ({
+        ...question,
+        choices: getDifficultyChoices(question.choices, question.answer, difficulty, randomSeed + index),
+      })),
+    [difficulty, quizId, randomSeed],
+  );
   const { questionIndex, answerQuestion, isComplete, correctAnswers } = useQuestionProgress(questions.length, onAnswer);
   const question = questions[questionIndex];
 
   return (
     <GamePanel
       eyebrow={`MODE PENGETAHUAN • ${String(quizId).padStart(2, '0')}`}
-      title={getQuizName('pengetahuan', quizId) || 'Trivia Pengetahuan Umum'}
+      title="Trivia Pengetahuan Umum"
       prompt={question.prompt}
     >
       {isComplete ? (
@@ -214,7 +189,10 @@ export function TebakPengetahuanQuiz({ onAnswer, quizId = 1, difficulty = 'mediu
 
 export function MenghitungCepatQuiz({ onAnswer, quizId = 1, randomSeed = 1, difficulty = 'medium' }) {
   const questions = useMemo(
-    () => Array.from({ length: 10 }, (_, index) => createMathQuestion(quizId, index, randomSeed, difficulty)),
+    () => seededShuffle(
+      Array.from({ length: TOTAL_QUESTIONS }, (_, index) => createMathQuestion(quizId, index, randomSeed, difficulty)),
+      randomSeed + quizId,
+    ),
     [difficulty, quizId, randomSeed],
   );
   const { questionIndex, answerQuestion, isComplete, correctAnswers } = useQuestionProgress(questions.length, onAnswer);

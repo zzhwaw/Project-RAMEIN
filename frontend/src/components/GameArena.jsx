@@ -1,17 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import './GameArena.css';
-import TebakPeta from './games/TebakPeta';
-import FaktaMitos from './games/FaktaMitos';
-import SusunTataSurya from './games/SusunTataSurya';
-import {
-  AnatomiTubuh,
-  EksperimenKimia,
-  RantaiMakanan,
-  TebakBendera,
-  TebakLandmark,
-  TebakPenemu,
-  WujudZat,
-} from './games/AdditionalMiniGames';
 import {
   MenghitungCepatQuiz,
   TebakGambarQuiz,
@@ -20,34 +8,12 @@ import {
 import { getQuizName, QUIZ_MODES } from './games/quizCatalog';
 
 const QUIZ_COMPONENTS = {
-  gambar: {
-    1: TebakPeta,
-    2: TebakBendera,
-    3: TebakLandmark,
-    4: TebakGambarQuiz,
-    5: TebakGambarQuiz,
-    6: TebakGambarQuiz,
-    7: TebakGambarQuiz,
-    8: TebakGambarQuiz,
-    9: TebakGambarQuiz,
-    10: TebakGambarQuiz,
-  },
-  pengetahuan: {
-    1: TebakPengetahuanQuiz,
-    2: FaktaMitos,
-    3: SusunTataSurya,
-    4: TebakPenemu,
-    5: RantaiMakanan,
-    6: AnatomiTubuh,
-    7: EksperimenKimia,
-    8: WujudZat,
-    9: TebakPengetahuanQuiz,
-    10: TebakPengetahuanQuiz,
-  },
+  gambar: Object.fromEntries(Array.from({ length: 10 }, (_, index) => [index + 1, TebakGambarQuiz])),
+  pengetahuan: Object.fromEntries(Array.from({ length: 10 }, (_, index) => [index + 1, TebakPengetahuanQuiz])),
   hitung: Object.fromEntries(Array.from({ length: 10 }, (_, index) => [index + 1, MenghitungCepatQuiz])),
 };
 
-const TOTAL_QUESTIONS = 10;
+const TOTAL_QUESTIONS = 20;
 
 export default function GameArena({
   activeMode,
@@ -165,7 +131,7 @@ export default function GameArena({
             onAnswer={submitQuestionAnswer}
             quizId={quizId}
             difficulty={difficulty}
-            randomSeed={Array.from(roundId || `${activeMode}-${quizId}`).reduce(
+            randomSeed={Array.from(`${roundId || activeMode}-${quizId}`).reduce(
               (seed, character) => (seed * 31 + character.charCodeAt(0)) >>> 0,
               quizId >>> 0,
             )}
