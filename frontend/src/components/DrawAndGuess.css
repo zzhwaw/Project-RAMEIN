@@ -1,0 +1,467 @@
+.draw-game {
+  --draw-ink: #292536;
+  --draw-pink: #ff72c6;
+  --draw-blue: #4fc4ff;
+  --draw-yellow: #ffcd38;
+  width: 100%;
+  height: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow: auto;
+  padding: clamp(12px, 2.4vw, 28px);
+  color: var(--draw-ink);
+  background:
+    radial-gradient(circle at 8% 18%, rgba(255, 114, 198, 0.18) 0 90px, transparent 92px),
+    radial-gradient(circle at 90% 86%, rgba(79, 196, 255, 0.2) 0 130px, transparent 132px),
+    #fff9e8;
+}
+
+.draw-topbar,
+.draw-word-card,
+.draw-layout,
+.draw-footer {
+  width: min(100%, 1440px);
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.draw-topbar {
+  display: grid;
+  grid-template-columns: auto minmax(180px, 1fr) auto auto;
+  align-items: center;
+  gap: clamp(10px, 2vw, 22px);
+  margin-bottom: 16px;
+}
+
+.draw-brand {
+  color: #f04e69;
+  font-size: clamp(1.05rem, 3vw, 1.5rem);
+  font-weight: 900;
+  letter-spacing: 1.5px;
+  text-shadow: 2px 2px 0 var(--draw-yellow);
+  white-space: nowrap;
+}
+
+.draw-turn-status,
+.draw-timer,
+.draw-total-timer {
+  min-width: 0;
+  padding: 8px 12px;
+  border: 3px solid var(--draw-ink);
+  border-radius: 14px;
+  box-shadow: 4px 4px 0 var(--draw-ink);
+}
+
+.draw-turn-status {
+  display: grid;
+  gap: 2px;
+  background: #b7eead;
+}
+
+.draw-turn-label,
+.draw-total-timer > span {
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.8px;
+}
+
+.draw-turn-status > strong {
+  overflow: hidden;
+  font-size: clamp(0.82rem, 2vw, 1rem);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.draw-timer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  background: var(--draw-yellow);
+}
+
+.draw-timer > strong,
+.draw-total-timer > strong {
+  font-size: clamp(1rem, 2.5vw, 1.35rem);
+  font-variant-numeric: tabular-nums;
+}
+
+.draw-timer > small {
+  font-size: 0.65rem;
+}
+
+.draw-timer-urgent {
+  background: #ff8c8c;
+  animation: draw-timer-pulse 650ms ease-in-out infinite alternate;
+}
+
+.draw-total-timer {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  background: var(--draw-blue);
+}
+
+.draw-word-card {
+  display: grid;
+  justify-items: center;
+  gap: 5px;
+  margin-bottom: 16px;
+  padding: 10px 16px;
+  border: 3px solid var(--draw-ink);
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 5px 5px 0 var(--draw-ink);
+  text-align: center;
+}
+
+.draw-word-card > span {
+  color: #e84f91;
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 1.2px;
+}
+
+.draw-word-card > strong {
+  min-height: 1.2em;
+  font-size: clamp(1.2rem, 3vw, 1.8rem);
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  overflow-wrap: anywhere;
+}
+
+.draw-word-card > small {
+  color: #6d6676;
+  font-size: 0.75rem;
+}
+
+.draw-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(250px, 320px);
+  align-items: stretch;
+  gap: 18px;
+}
+
+.draw-board-card,
+.draw-chat-card {
+  min-width: 0;
+  border: 4px solid var(--draw-ink);
+  border-radius: 22px;
+  background: #fff;
+  box-shadow: 7px 7px 0 var(--draw-ink);
+}
+
+.draw-board-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: clamp(10px, 1.6vw, 16px);
+}
+
+.draw-board-heading,
+.draw-chat-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.draw-board-heading > strong,
+.draw-chat-heading > strong {
+  font-size: 0.82rem;
+  font-weight: 900;
+  letter-spacing: 0.6px;
+}
+
+.draw-board-heading > span,
+.draw-chat-heading > span {
+  color: #756d7c;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-align: right;
+}
+
+.draw-canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  border: 3px solid var(--draw-ink);
+  border-radius: 12px;
+  background-color: #fff;
+  background-image:
+    linear-gradient(rgba(41, 37, 54, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(41, 37, 54, 0.025) 1px, transparent 1px);
+  background-size: 24px 24px;
+  touch-action: none;
+}
+
+.draw-canvas-active {
+  cursor: crosshair;
+}
+
+.draw-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding-top: 2px;
+}
+
+.draw-tool-group,
+.draw-color-palette {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.draw-size-button,
+.draw-color-button,
+.draw-eraser-button,
+.draw-clear-button {
+  min-height: 38px;
+  border: 2px solid var(--draw-ink);
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 2px 2px 0 var(--draw-ink);
+  cursor: pointer;
+  transition: transform 120ms ease, box-shadow 120ms ease;
+}
+
+.draw-size-button,
+.draw-color-button {
+  width: 38px;
+  display: grid;
+  place-items: center;
+  padding: 4px;
+}
+
+.draw-size-button > span {
+  border-radius: 50%;
+  background: var(--draw-ink);
+}
+
+.draw-color-button {
+  background: var(--draw-color);
+}
+
+.draw-color-selected,
+.draw-tool-selected {
+  outline: 3px solid var(--draw-blue);
+  outline-offset: 1px;
+}
+
+.draw-eraser-button,
+.draw-clear-button {
+  padding: 7px 10px;
+  font-size: 0.76rem;
+  font-weight: 900;
+}
+
+.draw-eraser-button { background: #e9dcff; }
+.draw-clear-button { background: #ffd2e8; }
+
+.draw-size-button:hover,
+.draw-color-button:hover,
+.draw-eraser-button:hover,
+.draw-clear-button:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0 var(--draw-ink);
+}
+
+.draw-size-button:focus-visible,
+.draw-color-button:focus-visible,
+.draw-eraser-button:focus-visible,
+.draw-clear-button:focus-visible,
+.draw-guess-form button:focus-visible,
+.draw-guess-form input:focus-visible {
+  outline: 3px solid #168aad;
+  outline-offset: 2px;
+}
+
+.draw-chat-card {
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 14px;
+}
+
+.draw-chat-heading {
+  padding-bottom: 10px;
+  border-bottom: 2px dashed #d4ced9;
+}
+
+.draw-chat-list {
+  min-height: 120px;
+  max-height: min(50vh, 500px);
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 2px;
+  overscroll-behavior: contain;
+}
+
+.draw-chat-empty {
+  padding: 16px 8px;
+  color: #8b8492;
+  font-size: 0.82rem;
+  text-align: center;
+}
+
+.draw-chat-message {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 2px 7px;
+  margin: 0 0 8px;
+  padding: 8px 9px;
+  border: 2px solid var(--draw-ink);
+  border-radius: 11px;
+  background: #f7f5fa;
+  font-size: 0.8rem;
+  overflow-wrap: anywhere;
+}
+
+.draw-chat-message > strong {
+  color: #e84f91;
+}
+
+.draw-chat-message > span {
+  min-width: 0;
+}
+
+.draw-chat-message > b {
+  grid-column: 1 / -1;
+  color: #168a4b;
+  font-size: 0.7rem;
+}
+
+.draw-chat-correct {
+  background: #d8f6cd;
+}
+
+.draw-guess-form {
+  display: flex;
+  gap: 7px;
+  padding-top: 9px;
+  border-top: 2px dashed #d4ced9;
+}
+
+.draw-guess-form > input {
+  min-width: 0;
+  flex: 1;
+  padding: 10px;
+  border: 2px solid var(--draw-ink);
+  border-radius: 10px;
+  background: #fff;
+  font-size: 0.85rem;
+}
+
+.draw-guess-form > button {
+  padding: 8px 11px;
+  border: 2px solid var(--draw-ink);
+  border-radius: 10px;
+  background: var(--draw-yellow);
+  box-shadow: 2px 2px 0 var(--draw-ink);
+  font-size: 0.76rem;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.draw-guess-form > button:disabled {
+  opacity: 0.48;
+  cursor: not-allowed;
+}
+
+.draw-error {
+  margin-top: 8px;
+  color: #b42338;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.draw-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 14px 2px 2px;
+  color: #756d7c;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.draw-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@keyframes draw-timer-pulse {
+  to { transform: scale(1.04); }
+}
+
+@media (max-width: 850px) {
+  .draw-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .draw-chat-card {
+    min-height: 260px;
+  }
+  .draw-chat-list {
+    max-height: 280px;
+  }
+}
+
+@media (max-width: 560px) {
+  .draw-game { padding: 12px; }
+  .draw-topbar {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    gap: 8px;
+  }
+  .draw-brand { grid-column: 1 / -1; }
+  .draw-turn-status {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+  .draw-timer,
+  .draw-total-timer {
+    grid-row: 3;
+    padding: 7px 9px;
+    border-width: 2px;
+    box-shadow: 3px 3px 0 var(--draw-ink);
+  }
+  .draw-turn-status > strong { white-space: normal; }
+  .draw-word-card { padding: 9px; }
+  .draw-board-card,
+  .draw-chat-card {
+    border-width: 3px;
+    border-radius: 16px;
+    box-shadow: 5px 5px 0 var(--draw-ink);
+  }
+  .draw-board-heading > strong,
+  .draw-chat-heading > strong { font-size: 0.72rem; }
+  .draw-board-heading > span,
+  .draw-chat-heading > span { font-size: 0.65rem; }
+  .draw-toolbar { gap: 7px; }
+  .draw-size-button,
+  .draw-color-button { width: 34px; min-height: 34px; }
+  .draw-eraser-button,
+  .draw-clear-button { min-height: 34px; padding: 6px 8px; }
+  .draw-footer {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .draw-timer-urgent { animation: none; }
+  .draw-size-button,
+  .draw-color-button,
+  .draw-eraser-button,
+  .draw-clear-button { transition: none; }
+}

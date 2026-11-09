@@ -9,6 +9,7 @@ const MODES = [
   { id: 'gambar', title: 'Tebak Gambar', icon: '🖼️', color: 'blue' },
   { id: 'pengetahuan', title: 'Tebak Pengetahuan', icon: '🧠', color: 'pink' },
   { id: 'hitung', title: 'Menghitung Cepat', icon: '🔢', color: 'yellow' },
+  { id: 'gambar-tebak', title: 'Gambar & Tebak', icon: '🎨', color: 'green' },
 ];
 
 function getRandomMode(excludedMode) {

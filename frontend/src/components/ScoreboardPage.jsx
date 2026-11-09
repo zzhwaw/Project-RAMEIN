@@ -5,7 +5,8 @@ const podiumStyles = {
 };
 const TOTAL_QUESTIONS = 20;
 
-export default function ScoreboardPage({ roomName, players = [], reason, onContinue }) {
+export default function ScoreboardPage({ roomName, players = [], reason, mode, onContinue }) {
+  const isDrawMode = mode === 'gambar-tebak';
   const ranking = [...players].sort((first, second) => (
     (Number(second.score) || 0) - (Number(first.score) || 0)
     || (first.name || '').localeCompare(second.name || '')
@@ -41,11 +42,15 @@ export default function ScoreboardPage({ roomName, players = [], reason, onConti
             <span className="scoreboard-winner-label">JUARA 1</span>
             <strong className="scoreboard-winner-name">{winner.name || 'Pemain'}</strong>
             <span className="scoreboard-winner-score">{Number(winner.score) || 0} poin</span>
-            <span className="scoreboard-winner-breakdown">
-              {Number(winner.correctAnswers) || 0}/{TOTAL_QUESTIONS} benar
-              <span aria-hidden="true"> · </span>
-              +{Number(winner.speedBonus) || 0} poin cepat
-            </span>
+            {isDrawMode ? (
+              <span className="scoreboard-winner-breakdown">Poin dari tebakan yang benar</span>
+            ) : (
+              <span className="scoreboard-winner-breakdown">
+                {Number(winner.correctAnswers) || 0}/{TOTAL_QUESTIONS} benar
+                <span aria-hidden="true"> · </span>
+                +{Number(winner.speedBonus) || 0} poin cepat
+              </span>
+            )}
           </section>
         )}
 
@@ -65,9 +70,11 @@ export default function ScoreboardPage({ roomName, players = [], reason, onConti
                 <span className="scoreboard-player-info">
                   <strong>{player.name || 'Pemain'}</strong>
                   <small>{rank === 1 ? 'JUARA 1' : `JUARA ${rank}`}{player.isHost ? ' · HOST' : ''}</small>
-                  <small className="scoreboard-player-bonus">
-                    {Number(player.correctAnswers) || 0}/{TOTAL_QUESTIONS} benar · +{Number(player.speedBonus) || 0} poin cepat
-                  </small>
+                  {!isDrawMode && (
+                    <small className="scoreboard-player-bonus">
+                      {Number(player.correctAnswers) || 0}/{TOTAL_QUESTIONS} benar · +{Number(player.speedBonus) || 0} poin cepat
+                    </small>
+                  )}
                 </span>
                 <span className="scoreboard-player-score">{Number(player.score) || 0}<small> POIN</small></span>
               </li>
