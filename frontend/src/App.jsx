@@ -130,6 +130,7 @@ export default function App() {
   };
 
   const handleSetReady = (ready) => requestRoom('player:ready', { ready });
+  const handleUpdateRoomSettings = (settings) => requestRoom('room:update-settings', settings);
   const handleStartGame = () => requestRoom('game:start', {});
   const handleGameAnswer = (progress) => {
     if (!game) return;
@@ -223,6 +224,7 @@ export default function App() {
           onLeave={handleLeaveRoom}
           onSetReady={handleSetReady}
           onStartGame={handleStartGame}
+          onUpdateSettings={handleUpdateRoomSettings}
         />
       )}
       {page === 'modeReveal' && game && (

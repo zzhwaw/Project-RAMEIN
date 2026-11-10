@@ -27,6 +27,7 @@ const DRAW_BRUSH_SIZES = [4, 8, 14];
 const DRAW_COLORS = ['#292536', '#ef476f', '#ff9f1c', '#ffd166', '#06a77d', '#168aad', '#4361ee', '#9b5de5'];
 const GAME_DURATION_MS = { easy: 120_000, medium: 90_000, hard: 60_000 };
 const GAME_MODES = ['gambar', 'pengetahuan', 'hitung', DRAW_MODE];
+const ROOM_MODE_SELECTIONS = ['random', ...GAME_MODES];
 const GAME_DIFFICULTIES = ['easy', 'medium', 'hard'];
 const QUESTION_BASE_POINTS = 100;
 const MAX_SPEED_BONUS = 50;
@@ -58,6 +59,7 @@ function getRoomSnapshot(room) {
     name: room.name,
     hostId: room.hostId,
     capacity: room.capacity,
+    modeSelection: room.modeSelection,
     difficulty: room.difficulty,
     phase: room.phase,
     game: room.game,
@@ -206,6 +208,7 @@ io.on('connection', (socket) => {
     const roomName = cleanText(payload.roomName, 30);
     const capacity = Number(payload.capacity);
     const difficulty = payload.difficulty ?? 'medium';
+    const modeSelection = payload.modeSelection ?? 'random';
 
     if (!playerName || !roomName) {
       callback({ error: 'Nama pemain dan nama room harus diisi.' });
@@ -217,6 +220,10 @@ io.on('connection', (socket) => {
     }
     if (!GAME_DIFFICULTIES.includes(difficulty)) {
       callback({ error: 'Pilih tingkat kesulitan easy, medium, atau hard.' });
+      return;
+    }
+    if (!ROOM_MODE_SELECTIONS.includes(modeSelection)) {
+      callback({ error: 'Pilih mode acak atau salah satu mode permainan yang tersedia.' });
       return;
     }
 
@@ -239,6 +246,7 @@ io.on('connection', (socket) => {
       name: roomName,
       hostId: socket.id,
       capacity,
+      modeSelection,
       difficulty,
       phase: 'lobby',
       game: null,
@@ -300,6 +308,44 @@ io.on('connection', (socket) => {
     callback({ room: snapshot });
   });
 
+  socket.on('room:update-settings', (payload = {}, callback = () => {}) => {
+    const room = rooms.get(socket.data.roomId);
+    if (!room || !room.players.has(socket.id)) {
+      callback({ error: 'Kamu tidak berada di dalam room.' });
+      return;
+    }
+    if (room.hostId !== socket.id) {
+      callback({ error: 'Hanya host yang dapat mengubah pengaturan room.' });
+      return;
+    }
+    if (room.phase !== 'lobby') {
+      callback({ error: 'Pengaturan hanya dapat diubah saat berada di lobby.' });
+      return;
+    }
+
+    const modeSelection = payload.modeSelection;
+    const difficulty = payload.difficulty;
+    if (!ROOM_MODE_SELECTIONS.includes(modeSelection)) {
+      callback({ error: 'Pilih mode acak atau salah satu mode permainan yang tersedia.' });
+      return;
+    }
+    if (!GAME_DIFFICULTIES.includes(difficulty)) {
+      callback({ error: 'Pilih tingkat kesulitan easy, medium, atau hard.' });
+      return;
+    }
+
+    const changed = room.modeSelection !== modeSelection || room.difficulty !== difficulty;
+    room.modeSelection = modeSelection;
+    room.difficulty = difficulty;
+    if (changed) {
+      room.players.forEach((player) => {
+        player.ready = false;
+      });
+    }
+    broadcastRoom(room);
+    callback({ room: getRoomSnapshot(room) });
+  });
+
   socket.on('player:ready', (payload = {}, callback = () => {}) => {
     const room = rooms.get(socket.data.roomId);
     const player = room?.players.get(socket.id);
@@ -341,7 +387,9 @@ io.on('connection', (socket) => {
     }
 
     const now = Date.now();
-    const activeMode = GAME_MODES[randomInt(0, GAME_MODES.length)];
+    const activeMode = room.modeSelection === 'random'
+      ? GAME_MODES[randomInt(0, GAME_MODES.length)]
+      : room.modeSelection;
     const durationMs = activeMode === DRAW_MODE ? DRAW_GAME_DURATION_MS : GAME_DURATION_MS[room.difficulty];
     const quizId = randomInt(1, 11);
     room.phase = 'playing';

@@ -1,10 +1,18 @@
 import { useState } from 'react';
 
+const GAME_MODES = [
+  { value: 'gambar', label: 'Tebak Gambar' },
+  { value: 'pengetahuan', label: 'Tebak Pengetahuan' },
+  { value: 'hitung', label: 'Menghitung Cepat' },
+  { value: 'gambar-tebak', label: 'Gambar & Tebak' },
+];
+
 export default function CreateRoomPage({ className = '', onBack, onCreateRoom }) {
   const [roomName, setRoomName] = useState('');
   const [playerName, setPlayerName] = useState('');
   const [capacity, setCapacity] = useState('6');
   const [difficulty, setDifficulty] = useState('medium');
+  const [modeSelection, setModeSelection] = useState('random');
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -17,6 +25,7 @@ export default function CreateRoomPage({ className = '', onBack, onCreateRoom })
       playerName,
       capacity: Number(capacity),
       difficulty,
+      modeSelection,
     });
     if (result.error) setError(result.error);
     setIsSubmitting(false);
@@ -75,6 +84,19 @@ export default function CreateRoomPage({ className = '', onBack, onCreateRoom })
               <option value="4">4 pemain</option>
               <option value="5">5 pemain</option>
               <option value="6">6 pemain</option>
+            </select>
+
+            <label htmlFor="game-mode">Mode permainan</label>
+            <select
+              id="game-mode"
+              name="modeSelection"
+              value={modeSelection}
+              onChange={(event) => setModeSelection(event.target.value)}
+            >
+              <option value="random">Acak setiap game</option>
+              {GAME_MODES.map((mode) => (
+                <option key={mode.value} value={mode.value}>{mode.label}</option>
+              ))}
             </select>
 
             <label htmlFor="game-difficulty">Tingkat kesulitan</label>
