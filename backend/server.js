@@ -23,7 +23,8 @@ const DRAW_GAME_DURATION_MS = 10 * 60_000;
 const DRAW_TURN_DURATION_MS = 60_000;
 const DRAW_TOTAL_TURNS = 10;
 const DRAW_MAX_SEGMENTS = 5_000;
-const DRAW_BRUSH_SIZES = [4, 8, 14];
+const DRAW_MIN_TOOL_SIZE = 1;
+const DRAW_MAX_TOOL_SIZE = 10;
 const DRAW_COLORS = ['#292536', '#ef476f', '#ff9f1c', '#ffd166', '#06a77d', '#168aad', '#4361ee', '#9b5de5'];
 const GAME_DURATION_MS = { easy: 120_000, medium: 90_000, hard: 60_000 };
 const GAME_MODES = ['gambar', 'pengetahuan', 'hitung', DRAW_MODE];
@@ -98,7 +99,11 @@ function beginDrawTurn(room) {
   const drawGame = room.drawGame;
   if (room.phase !== 'playing' || room.game?.activeMode !== DRAW_MODE || !drawGame) return;
   clearTimeout(drawGame.turnTimeout);
-  if (drawGame.turnNumber >= DRAW_TOTAL_TURNS || Date.now() >= room.game.endsAt) {
+  if (drawGame.turnNumber >= DRAW_TOTAL_TURNS) {
+    finishGame(room, 'all-turns-complete');
+    return;
+  }
+  if (Date.now() >= room.game.endsAt) {
     finishGame(room, 'time-up');
     return;
   }
@@ -485,7 +490,9 @@ io.on('connection', (socket) => {
       return;
     }
     if (!coordinates.every((value) => Number.isFinite(value) && value >= 0 && value <= 1)
-      || !DRAW_BRUSH_SIZES.includes(segment.width)
+      || !Number.isInteger(segment.width)
+      || segment.width < DRAW_MIN_TOOL_SIZE
+      || segment.width > DRAW_MAX_TOOL_SIZE
       || !DRAW_COLORS.includes(segment.color)
       || typeof segment.erase !== 'boolean') {
       callback({ error: 'Data garis tidak valid.' });
@@ -539,6 +546,8 @@ io.on('connection', (socket) => {
     const drawGame = room?.drawGame;
     if (!room || !player || room.phase !== 'playing' || !drawGame
       || payload.roundId !== drawGame.roundId
+      || !drawGame.drawerId
+      || !drawGame.currentWord
       || payload.turnNumber !== drawGame.turnNumber
       || Date.now() >= drawGame.turnEndsAt) {
       callback({ error: 'Giliran menebak ini sudah berakhir.' });
@@ -602,6 +611,11 @@ io.on('connection', (socket) => {
         guesserPoints: 100,
         drawerPoints: drawer ? 50 : 0,
       });
+      if (drawGame.turnNumber >= DRAW_TOTAL_TURNS) {
+        finishGame(room, 'all-turns-complete');
+      } else {
+        beginDrawTurn(room);
+      }
     }
     callback({ ok: true, isCorrect });
   });
