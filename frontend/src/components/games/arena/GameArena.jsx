@@ -4,8 +4,8 @@ import {
   MenghitungCepatQuiz,
   TebakGambarQuiz,
   TebakPengetahuanQuiz,
-} from './games/ModeQuizSamples';
-import { getQuizName, QUIZ_MODES } from './games/quizCatalog';
+} from '../quizzes/ModeQuizSamples';
+import { getQuizName, QUIZ_MODES } from '../quizzes/quizCatalog';
 
 const QUIZ_COMPONENTS = {
   gambar: Object.fromEntries(Array.from({ length: 10 }, (_, index) => [index + 1, TebakGambarQuiz])),
