@@ -181,10 +181,10 @@
   text-align: right;
 }
 
-.draw-canvas {
-  display: block;
+.draw-canvas-wrap {
+  position: relative;
   width: 100%;
-  height: auto;
+  overflow: hidden;
   aspect-ratio: 16 / 9;
   border: 3px solid var(--draw-ink);
   border-radius: 12px;
@@ -193,11 +193,33 @@
     linear-gradient(rgba(41, 37, 54, 0.025) 1px, transparent 1px),
     linear-gradient(90deg, rgba(41, 37, 54, 0.025) 1px, transparent 1px);
   background-size: 24px 24px;
+}
+
+.draw-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
   touch-action: none;
 }
 
-.draw-canvas-active {
-  cursor: crosshair;
+.draw-canvas-active .draw-canvas {
+  cursor: none;
+}
+
+.draw-canvas-cursor {
+  position: absolute;
+  z-index: 1;
+  border: 2px solid var(--draw-ink);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--cursor-color) 28%, transparent);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.8);
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+}
+
+.draw-canvas-cursor-eraser {
+  border: 2px solid #e84f91;
+  background: rgba(255, 255, 255, 0.58);
 }
 
 .draw-toolbar {
@@ -216,7 +238,6 @@
   gap: 5px;
 }
 
-.draw-size-button,
 .draw-color-button,
 .draw-eraser-button,
 .draw-clear-button {
@@ -229,17 +250,11 @@
   transition: transform 120ms ease, box-shadow 120ms ease;
 }
 
-.draw-size-button,
 .draw-color-button {
   width: 38px;
   display: grid;
   place-items: center;
   padding: 4px;
-}
-
-.draw-size-button > span {
-  border-radius: 50%;
-  background: var(--draw-ink);
 }
 
 .draw-color-button {
@@ -262,7 +277,6 @@
 .draw-eraser-button { background: #e9dcff; }
 .draw-clear-button { background: #ffd2e8; }
 
-.draw-size-button:hover,
 .draw-color-button:hover,
 .draw-eraser-button:hover,
 .draw-clear-button:hover {
@@ -270,7 +284,6 @@
   box-shadow: 3px 3px 0 var(--draw-ink);
 }
 
-.draw-size-button:focus-visible,
 .draw-color-button:focus-visible,
 .draw-eraser-button:focus-visible,
 .draw-clear-button:focus-visible,
@@ -278,6 +291,46 @@
 .draw-guess-form input:focus-visible {
   outline: 3px solid #168aad;
   outline-offset: 2px;
+}
+
+.draw-size-control {
+  min-width: 105px;
+  display: grid;
+  gap: 5px;
+  padding: 5px 8px;
+  border: 2px solid var(--draw-ink);
+  border-radius: 10px;
+  background: #f7f5fa;
+  box-shadow: 2px 2px 0 var(--draw-ink);
+}
+
+.draw-size-control > span {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 0.68rem;
+  font-weight: 900;
+}
+
+.draw-size-control output {
+  min-width: 19px;
+  padding: 1px 5px;
+  border-radius: 6px;
+  background: #fff;
+  text-align: center;
+}
+
+.draw-size-control input {
+  width: 100%;
+  height: 14px;
+  margin: 0;
+  accent-color: #168aad;
+  cursor: pointer;
+}
+
+.draw-size-control-active {
+  background: #dff4ff;
 }
 
 .draw-chat-card {
@@ -447,8 +500,8 @@
   .draw-board-heading > span,
   .draw-chat-heading > span { font-size: 0.65rem; }
   .draw-toolbar { gap: 7px; }
-  .draw-size-button,
   .draw-color-button { width: 34px; min-height: 34px; }
+  .draw-size-control { min-width: 115px; }
   .draw-eraser-button,
   .draw-clear-button { min-height: 34px; padding: 6px 8px; }
   .draw-footer {
@@ -460,7 +513,6 @@
 
 @media (prefers-reduced-motion: reduce) {
   .draw-timer-urgent { animation: none; }
-  .draw-size-button,
   .draw-color-button,
   .draw-eraser-button,
   .draw-clear-button { transition: none; }

@@ -2,7 +2,8 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import './DrawAndGuess.css';
 
 const COLORS = ['#292536', '#ef476f', '#ff9f1c', '#ffd166', '#06a77d', '#168aad', '#4361ee', '#9b5de5'];
-const BRUSH_SIZES = [4, 8, 14];
+const MIN_TOOL_SIZE = 1;
+const MAX_TOOL_SIZE = 10;
 const MAX_CHAT_MESSAGES = 50;
 
 function formatTime(seconds) {
@@ -14,7 +15,7 @@ function paintSegment(context, segment, width, height) {
   context.save();
   context.globalCompositeOperation = segment.erase ? 'destination-out' : 'source-over';
   context.strokeStyle = segment.color;
-  context.lineWidth = segment.width;
+  context.lineWidth = segment.width * 2;
   context.lineCap = 'round';
   context.lineJoin = 'round';
   context.beginPath();
@@ -28,10 +29,12 @@ export default function DrawAndGuess({ socket, game, timeLeft, players = [], cur
   const canvasRef = useRef(null);
   const lastPointRef = useRef(null);
   const isDrawingRef = useRef(false);
+  const [cursor, setCursor] = useState(null);
   const [turn, setTurn] = useState(null);
   const [word, setWord] = useState('');
   const [color, setColor] = useState(COLORS[0]);
-  const [brushSize, setBrushSize] = useState(BRUSH_SIZES[1]);
+  const [brushSize, setBrushSize] = useState(5);
+  const [eraserSize, setEraserSize] = useState(5);
   const [isEraser, setIsEraser] = useState(false);
   const [chatMessages, setChatMessages] = useState([]);
   const [guess, setGuess] = useState('');
@@ -60,6 +63,7 @@ export default function DrawAndGuess({ socket, game, timeLeft, players = [], cur
       setWord('');
       setSolved(false);
       setError('');
+      setCursor(null);
       clearCanvas();
     };
     const handleWord = (payload) => {
@@ -124,6 +128,7 @@ export default function DrawAndGuess({ socket, game, timeLeft, players = [], cur
   }, [game.clientClockOffset, turn]);
 
   const isDrawer = turn?.drawerId === currentPlayerId;
+  const toolSize = isEraser ? eraserSize : brushSize;
   const drawer = players.find((player) => player.id === turn?.drawerId);
   const maskedWord = word
     ? word.split('').map((letter) => (letter === ' ' ? '　' : '_')).join(' ')
@@ -156,7 +161,7 @@ export default function DrawAndGuess({ socket, game, timeLeft, players = [], cur
       x1: point.x,
       y1: point.y,
       color,
-      width: brushSize,
+      width: toolSize,
       erase: isEraser,
     };
     drawSegment(segment);
@@ -164,6 +169,20 @@ export default function DrawAndGuess({ socket, game, timeLeft, players = [], cur
       if (response?.error) setError(response.error);
     });
     lastPointRef.current = point;
+  };
+
+  const handleCanvasPointerMove = (event) => {
+    const canvas = canvasRef.current;
+    if (canvas) {
+      const bounds = canvas.getBoundingClientRect();
+      const diameter = toolSize * 2 * (bounds.width / canvas.width);
+      setCursor({
+        x: event.clientX - bounds.left,
+        y: event.clientY - bounds.top,
+        diameter: Math.max(2, diameter),
+      });
+    }
+    draw(event);
   };
 
   const stopDrawing = () => {
@@ -225,34 +244,52 @@ export default function DrawAndGuess({ socket, game, timeLeft, players = [], cur
             <strong>{isDrawer ? 'PAPAN GAMBAR KAMU' : 'TEBAKAN TEMANMU'}</strong>
             <span>{solved ? 'TERTEBAK! 🎉' : isDrawer ? 'Saatnya menggambar' : 'Jawab sebelum waktu habis!'}</span>
           </div>
-          <canvas
-            ref={canvasRef}
-            className={`draw-canvas${isDrawer && !solved ? ' draw-canvas-active' : ''}`}
-            width="960"
-            height="540"
-            aria-label={isDrawer ? 'Canvas menggambar' : 'Canvas gambar yang disinkronkan'}
-            onPointerDown={startDrawing}
-            onPointerMove={draw}
-            onPointerUp={stopDrawing}
-            onPointerCancel={stopDrawing}
-            onLostPointerCapture={stopDrawing}
-          />
+          <div className={`draw-canvas-wrap${isDrawer && !solved ? ' draw-canvas-active' : ''}`}>
+            <canvas
+              ref={canvasRef}
+              className="draw-canvas"
+              width="960"
+              height="540"
+              aria-label={isDrawer ? 'Canvas menggambar' : 'Canvas gambar yang disinkronkan'}
+              onPointerDown={startDrawing}
+              onPointerMove={handleCanvasPointerMove}
+              onPointerLeave={() => setCursor(null)}
+              onPointerUp={stopDrawing}
+              onPointerCancel={stopDrawing}
+              onLostPointerCapture={stopDrawing}
+            />
+            {isDrawer && !solved && cursor && (
+              <span
+                className={`draw-canvas-cursor${isEraser ? ' draw-canvas-cursor-eraser' : ''}`}
+                style={{
+                  left: cursor.x,
+                  top: cursor.y,
+                  width: cursor.diameter,
+                  height: cursor.diameter,
+                  '--cursor-color': color,
+                }}
+                aria-hidden="true"
+              />
+            )}
+          </div>
           {isDrawer && (
             <div className="draw-toolbar" aria-label="Alat menggambar">
-              <div className="draw-tool-group" role="group" aria-label="Ketebalan kuas">
-                {BRUSH_SIZES.map((size) => (
-                  <button
-                    className={`draw-size-button${brushSize === size && !isEraser ? ' draw-tool-selected' : ''}`}
-                    key={size}
-                    type="button"
-                    onClick={() => { setBrushSize(size); setIsEraser(false); }}
-                    aria-label={`Kuas ukuran ${size}`}
-                    aria-pressed={brushSize === size && !isEraser}
-                  >
-                    <span style={{ width: size + 4, height: size + 4 }} />
-                  </button>
-                ))}
-              </div>
+              <label className={`draw-size-control${!isEraser ? ' draw-size-control-active' : ''}`}>
+                <span>✏️ Kuas <output>{brushSize}</output></span>
+                <input
+                  type="range"
+                  min={MIN_TOOL_SIZE}
+                  max={MAX_TOOL_SIZE}
+                  step="1"
+                  value={brushSize}
+                  onFocus={() => setIsEraser(false)}
+                  onChange={(event) => {
+                    setBrushSize(Number(event.target.value));
+                    setIsEraser(false);
+                  }}
+                  aria-label="Ukuran kuas, 1 sampai 10"
+                />
+              </label>
               <div className="draw-color-palette" role="group" aria-label="Warna kuas">
                 {COLORS.map((value) => (
                   <button
@@ -269,11 +306,27 @@ export default function DrawAndGuess({ socket, game, timeLeft, players = [], cur
               <button
                 className={`draw-eraser-button${isEraser ? ' draw-tool-selected' : ''}`}
                 type="button"
-                onClick={() => setIsEraser((active) => !active)}
+                onClick={() => setIsEraser(true)}
                 aria-pressed={isEraser}
               >
                 🧽 Penghapus
               </button>
+              <label className={`draw-size-control${isEraser ? ' draw-size-control-active' : ''}`}>
+                <span>Penghapus <output>{eraserSize}</output></span>
+                <input
+                  type="range"
+                  min={MIN_TOOL_SIZE}
+                  max={MAX_TOOL_SIZE}
+                  step="1"
+                  value={eraserSize}
+                  onFocus={() => setIsEraser(true)}
+                  onChange={(event) => {
+                    setEraserSize(Number(event.target.value));
+                    setIsEraser(true);
+                  }}
+                  aria-label="Ukuran penghapus, 1 sampai 10"
+                />
+              </label>
               <button className="draw-clear-button" type="button" onClick={handleClearCanvas}>
                 🗑 Bersihkan
               </button>
