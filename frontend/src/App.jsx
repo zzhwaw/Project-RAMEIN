@@ -1,14 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 import { io } from 'socket.io-client';
-import LandingPage from './components/LandingPage';
-import RoomSelectPage from './components/RoomSelectPage';
-import CreateRoomPage from './components/CreateRoomPage';
-import JoinRoomPage from './components/JoinRoomPage';
-import LobbyPage from './components/LobbyPage';
-import GameArena from './components/GameArena';
-import DrawAndGuess from './components/DrawAndGuess';
-import ModeReveal from './components/ModeReveal';
-import ScoreboardPage from './components/ScoreboardPage';
+import LandingPage from './components/pages/LandingPage';
+import RoomSelectPage from './components/pages/RoomSelectPage';
+import CreateRoomPage from './components/pages/CreateRoomPage';
+import JoinRoomPage from './components/pages/JoinRoomPage';
+import LobbyPage from './components/pages/LobbyPage';
+import ScoreboardPage from './components/pages/ScoreboardPage';
+import GameArena from './components/games/arena/GameArena';
+import DrawAndGuess from './components/games/arena/DrawAndGuess';
+import ModeReveal from './components/games/arena/ModeReveal';
 
 const PAGE_TRANSITION_MS = 700;
 
