@@ -25,6 +25,11 @@ export default function JoinRoomPage({ className = '', onBack, onJoinRoom }) {
 
   return (
     <main className={`join-room-page ${className}`}>
+      <div className="join-room-blobs" aria-hidden="true">
+        {Array.from({ length: 10 }, (_, index) => (
+          <span className="join-room-blob" key={index} />
+        ))}
+      </div>
       <button className="join-back-button" onClick={onBack} aria-label="Kembali ke pilihan room">
         &#10094;
       </button>
