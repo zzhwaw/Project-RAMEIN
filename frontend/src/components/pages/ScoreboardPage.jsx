@@ -16,11 +16,19 @@ export default function ScoreboardPage({ roomName, players = [], reason, mode, o
   const resultMessage = reason === 'time-up'
     ? 'Waktu habis! Ini hasil akhir ronde.'
     : 'Semua pemain sudah menjawab. Ini hasil akhirnya!';
+  const podiumPlayers = ranking.slice(0, 3);
 
   return (
     <main className="scoreboard-page">
       <div className="scoreboard-decoration scoreboard-decoration-pink" aria-hidden="true" />
       <div className="scoreboard-decoration scoreboard-decoration-blue" aria-hidden="true" />
+      <div className="scoreboard-confetti" aria-hidden="true">
+        {Array.from({ length: 18 }, (_, index) => (
+          <span className="scoreboard-confetti-piece" key={index} />
+        ))}
+      </div>
+      <span className="scoreboard-spark scoreboard-spark-one" aria-hidden="true">✦</span>
+      <span className="scoreboard-spark scoreboard-spark-two" aria-hidden="true">✹</span>
 
       <header className="scoreboard-header">
         <span className="scoreboard-brand">RAMEIN</span>
@@ -32,6 +40,27 @@ export default function ScoreboardPage({ roomName, players = [], reason, mode, o
         <p className="scoreboard-eyebrow">HASIL MINI GAME</p>
         <h1 id="scoreboard-title">Papan Juara</h1>
         <p className="scoreboard-description">{resultMessage}</p>
+
+        {podiumPlayers.length > 1 && (
+          <section className="scoreboard-podium" aria-label="Podium tiga besar">
+            {[podiumPlayers[1], podiumPlayers[0], podiumPlayers[2]].filter(Boolean).map((player, index) => {
+              const rank = index === 1 ? 1 : index === 0 ? 2 : 3;
+              return (
+                <div className={`scoreboard-podium-place scoreboard-podium-place-${rank}`} key={player.id || player.name}>
+                  <span className="scoreboard-podium-medal" aria-hidden="true">
+                    {rank === 1 ? '👑' : rank === 2 ? '🥈' : '🥉'}
+                  </span>
+                  <span className="scoreboard-podium-avatar" aria-hidden="true">
+                    {player.name?.slice(0, 1).toUpperCase() || '?'}
+                  </span>
+                  <strong className="scoreboard-podium-name">{player.name || 'Pemain'}</strong>
+                  <span className="scoreboard-podium-score">{Number(player.score) || 0} poin</span>
+                  <span className="scoreboard-podium-block">{rank === 1 ? '1' : rank}</span>
+                </div>
+              );
+            })}
+          </section>
+        )}
 
         {winner && (
           <section className="scoreboard-winner" aria-label={`Juara satu: ${winner.name || 'Pemain'}`}>
