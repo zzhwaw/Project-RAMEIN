@@ -13,9 +13,13 @@ export default function ScoreboardPage({ roomName, players = [], reason, mode, o
   ));
   const winner = ranking[0];
 
-  const resultMessage = reason === 'time-up'
-    ? 'Waktu habis! Ini hasil akhir ronde.'
-    : 'Semua pemain sudah menjawab. Ini hasil akhirnya!';
+  const resultMessages = {
+    'time-up': 'Waktu habis! Ini hasil akhir ronde.',
+    'all-answered': 'Semua pemain sudah menjawab. Ini hasil akhirnya!',
+    'all-turns-complete': 'Semua giliran gambar sudah selesai! Ini hasil akhirnya.',
+    'all-players-left': 'Permainan berakhir. Ini hasil skor terakhir.',
+  };
+  const resultMessage = resultMessages[reason] || 'Permainan berakhir. Ini hasil akhirnya!';
   const podiumPlayers = ranking.slice(0, 3);
 
   return (

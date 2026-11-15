@@ -29,6 +29,7 @@ export default function DrawAndGuess({ socket, game, timeLeft, players = [], cur
   const canvasRef = useRef(null);
   const lastPointRef = useRef(null);
   const isDrawingRef = useRef(false);
+  const turnRef = useRef(null);
   const [cursor, setCursor] = useState(null);
   const [turn, setTurn] = useState(null);
   const [word, setWord] = useState('');
@@ -59,6 +60,7 @@ export default function DrawAndGuess({ socket, game, timeLeft, players = [], cur
 
     const handleTurn = (nextTurn) => {
       if (nextTurn.roundId !== game.roundId) return;
+      turnRef.current = nextTurn;
       setTurn(nextTurn);
       setWord('');
       setSolved(false);
@@ -67,22 +69,24 @@ export default function DrawAndGuess({ socket, game, timeLeft, players = [], cur
       clearCanvas();
     };
     const handleWord = (payload) => {
-      if (payload.roundId === game.roundId) setWord(payload.word);
+      if (payload.roundId === game.roundId && payload.turnNumber === turnRef.current?.turnNumber) {
+        setWord(payload.word);
+      }
     };
     const handleStroke = (payload) => {
-      if (payload.roundId === game.roundId && payload.turnNumber === turn?.turnNumber) {
+      if (payload.roundId === game.roundId && payload.turnNumber === turnRef.current?.turnNumber) {
         drawSegment(payload.segment);
       }
     };
     const handleClear = (payload) => {
-      if (payload.roundId === game.roundId && payload.turnNumber === turn?.turnNumber) clearCanvas();
+      if (payload.roundId === game.roundId && payload.turnNumber === turnRef.current?.turnNumber) clearCanvas();
     };
     const handleChat = (message) => {
       if (message.roundId !== game.roundId) return;
       setChatMessages((current) => [...current, message].slice(-MAX_CHAT_MESSAGES));
     };
     const handleSolved = (payload) => {
-      if (payload.roundId !== game.roundId) return;
+      if (payload.roundId !== game.roundId || payload.turnNumber !== turnRef.current?.turnNumber) return;
       setSolved(true);
       setWord(payload.word);
     };
@@ -99,6 +103,7 @@ export default function DrawAndGuess({ socket, game, timeLeft, players = [], cur
         return;
       }
       if (response?.turn) {
+        turnRef.current = response.turn;
         setTurn(response.turn);
         setSolved(Boolean(response.solved));
         setChatMessages(response.messages || []);
@@ -115,7 +120,7 @@ export default function DrawAndGuess({ socket, game, timeLeft, players = [], cur
       socket.off('draw:chat', handleChat);
       socket.off('draw:solved', handleSolved);
     };
-  }, [clearCanvas, drawSegment, game?.roundId, socket, turn?.turnNumber]);
+  }, [clearCanvas, drawSegment, game?.roundId, socket]);
 
   useEffect(() => {
     if (!turn?.endsAt) return undefined;
