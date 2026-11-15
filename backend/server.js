@@ -181,6 +181,7 @@ function removePlayer(socket) {
     return;
   }
 
+  const wasCurrentDrawer = room.phase === 'playing' && room.drawGame?.drawerId === socket.id;
   room.players.delete(socket.id);
   socket.leave(room.id);
   delete socket.data.roomId;
@@ -199,6 +200,12 @@ function removePlayer(socket) {
     const nextHost = room.players.values().next().value;
     nextHost.isHost = true;
     room.hostId = nextHost.id;
+  }
+  if (wasCurrentDrawer) {
+    beginDrawTurn(room);
+    if (room.phase !== 'playing') return;
+    broadcastRoom(room);
+    return;
   }
   if (room.phase === 'playing' && [...room.players.values()].every((player) => player.answered)) {
     finishGame(room, 'all-answered');
