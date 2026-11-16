@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import './GameArena.css';
+import BlobAvatar, { BlobAvatarScene } from '../../BlobAvatars';
+import { getBlobAvatarId } from '../../blobAvatarUtils';
 import {
   MenghitungCepatQuiz,
   TebakGambarQuiz,
@@ -76,6 +78,7 @@ export default function GameArena({
   if (!GameComponent) {
     return (
       <main className="game-arena">
+        <BlobAvatarScene className="arena-avatar-scene" avatarIds={[1, 4]} />
         <section className="game-arena-card">
           <h1>Kuis tidak ditemukan</h1>
           <p>Mode harus gambar, pengetahuan, atau hitung dengan ID kuis 1 sampai 10.</p>
@@ -86,6 +89,7 @@ export default function GameArena({
 
   return (
     <main className="game-arena">
+      <BlobAvatarScene className="arena-avatar-scene" avatarIds={[1, 4]} />
       <div className="game-arena-topbar">
         <div className="game-arena-brand">RAMEIN</div>
         <div className="game-arena-score" aria-live="polite" aria-label={`Skor kamu ${displayedScore} poin`}>
@@ -115,7 +119,7 @@ export default function GameArena({
                 >
                   <span className="game-live-rank">{index + 1}</span>
                   <span className="game-live-avatar" aria-hidden="true">
-                    {player.name?.slice(0, 1).toUpperCase() || '?'}
+                    <BlobAvatar avatarId={getBlobAvatarId(player.id || player.name, index + 1)} size={32} />
                   </span>
                   <span className="game-live-player-name">
                     {player.id === currentPlayerId ? 'Kamu' : (player.name || 'Pemain')}

@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import './DrawAndGuess.css';
+import BlobAvatar, { BlobAvatarScene } from '../../BlobAvatars';
+import { getBlobAvatarId } from '../../blobAvatarUtils';
 
 const COLORS = ['#292536', '#ef476f', '#ff9f1c', '#ffd166', '#06a77d', '#168aad', '#4361ee', '#9b5de5'];
 const MIN_TOOL_SIZE = 1;
@@ -220,6 +222,7 @@ export default function DrawAndGuess({ socket, game, timeLeft, players = [], cur
 
   return (
     <main className="draw-game">
+      <BlobAvatarScene className="draw-avatar-scene" avatarIds={[1, 4]} />
       <header className="draw-topbar">
         <div className="draw-brand">RAMEIN <span>🎨</span></div>
         <div className="draw-turn-status">
@@ -350,6 +353,9 @@ export default function DrawAndGuess({ socket, game, timeLeft, players = [], cur
             )}
             {chatMessages.map((message) => (
               <p className={`draw-chat-message${message.isCorrect ? ' draw-chat-correct' : ''}`} key={message.id}>
+                <span className="draw-chat-avatar" aria-hidden="true">
+                  <BlobAvatar avatarId={getBlobAvatarId(message.playerId)} size={38} />
+                </span>
                 <strong>{message.playerName}</strong>
                 <span>{message.text}</span>
                 {message.isCorrect && <b>✓ BENAR!</b>}
