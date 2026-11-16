@@ -1,3 +1,5 @@
+import { BlobAvatarScene } from '../BlobAvatars';
+
 export default function RoomSelectPage({
   className = '',
   isOpen,
@@ -19,6 +21,7 @@ export default function RoomSelectPage({
           <div className="blob blob-pink-6"></div>
           <div className="blob blob-pink-7"></div>
         </div>
+        <BlobAvatarScene className="room-select-avatar-scene" avatarIds={[1, 5]} />
 
         <button className="btn-room" onClick={onCreateRoom} disabled={isTransitioning}>
           BUAT ROOM
@@ -41,6 +44,7 @@ export default function RoomSelectPage({
           <div className="blob blob-blue-6"></div>
           <div className="blob blob-blue-7"></div>
         </div>
+        <BlobAvatarScene className="room-select-avatar-scene" avatarIds={[2, 4]} />
 
         <button className="btn-room" onClick={onJoinRoom} disabled={isTransitioning}>
           GABUNG ROOM

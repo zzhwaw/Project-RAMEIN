@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import BlobAvatar from '../BlobAvatars';
+import { getBlobAvatarId } from '../blobAvatarUtils';
 
 const cardColors = ['card-pink', 'card-blue', 'card-yellow', 'card-red', 'card-green', 'card-black'];
 const gameModes = [
@@ -154,8 +156,12 @@ export default function LobbyPage({
           const player = roomPlayers[index];
           return (
             <div key={player?.id || colorClass} className={`player-card-wrapper ${player ? 'player-card-filled' : 'player-card-empty'}`}>
-              <div className={`player-card ${colorClass}`} aria-hidden="true">
-                {player && <span>{player.name?.slice(0, 1).toUpperCase() || '?'}</span>}
+              <div className={`player-card ${colorClass}${player?.ready ? ' player-card-ready' : ''}`} aria-hidden="true">
+                {player && (
+                  <span className="player-card-avatar">
+                    <BlobAvatar avatarId={getBlobAvatarId(player.id, index + 1)} size={140} />
+                  </span>
+                )}
                 {player?.isHost && <span className="player-host-badge">HOST</span>}
                 {player && <span className={`player-ready-badge ${player.ready ? 'player-ready-badge-active' : ''}`}>
                   {player.ready ? 'SIAP' : 'BELUM SIAP'}

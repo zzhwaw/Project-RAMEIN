@@ -1,3 +1,6 @@
+import BlobAvatar from '../BlobAvatars';
+import { getBlobAvatarId } from '../blobAvatarUtils';
+
 const podiumStyles = {
   1: 'score-rank-first',
   2: 'score-rank-second',
@@ -55,7 +58,7 @@ export default function ScoreboardPage({ roomName, players = [], reason, mode, o
                     {rank === 1 ? '👑' : rank === 2 ? '🥈' : '🥉'}
                   </span>
                   <span className="scoreboard-podium-avatar" aria-hidden="true">
-                    {player.name?.slice(0, 1).toUpperCase() || '?'}
+                    <BlobAvatar avatarId={getBlobAvatarId(player.id || player.name)} size={60} />
                   </span>
                   <strong className="scoreboard-podium-name">{player.name || 'Pemain'}</strong>
                   <span className="scoreboard-podium-score">{Number(player.score) || 0} poin</span>
@@ -70,7 +73,7 @@ export default function ScoreboardPage({ roomName, players = [], reason, mode, o
           <section className="scoreboard-winner" aria-label={`Juara satu: ${winner.name || 'Pemain'}`}>
             <span className="scoreboard-winner-crown" aria-hidden="true">👑</span>
             <span className="scoreboard-winner-avatar" aria-hidden="true">
-              {winner.name?.slice(0, 1).toUpperCase() || '?'}
+              <BlobAvatar avatarId={getBlobAvatarId(winner.id || winner.name)} size={78} />
             </span>
             <span className="scoreboard-winner-label">JUARA 1</span>
             <strong className="scoreboard-winner-name">{winner.name || 'Pemain'}</strong>
@@ -98,7 +101,7 @@ export default function ScoreboardPage({ roomName, players = [], reason, mode, o
                   {rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : rank}
                 </span>
                 <span className="scoreboard-player-avatar" aria-hidden="true">
-                  {player.name?.slice(0, 1).toUpperCase() || '?'}
+                  <BlobAvatar avatarId={getBlobAvatarId(player.id || player.name)} size={42} />
                 </span>
                 <span className="scoreboard-player-info">
                   <strong>{player.name || 'Pemain'}</strong>

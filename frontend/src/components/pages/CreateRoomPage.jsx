@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { BlobAvatarScene } from '../BlobAvatars';
 
 const GAME_MODES = [
   { value: 'gambar', label: 'Tebak Gambar' },
@@ -38,6 +39,7 @@ export default function CreateRoomPage({ className = '', onBack, onCreateRoom })
           <span className="create-room-blob" key={index} />
         ))}
       </div>
+      <BlobAvatarScene className="create-avatar-scene" avatarIds={[3, 6]} />
       <button className="create-back-button" onClick={onBack} aria-label="Kembali ke pilihan room">
         &#10094;
       </button>

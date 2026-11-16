@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { BlobAvatarScene } from '../BlobAvatars';
 
 export default function JoinRoomPage({ className = '', onBack, onJoinRoom }) {
   const [roomCode, setRoomCode] = useState('');
@@ -30,6 +31,7 @@ export default function JoinRoomPage({ className = '', onBack, onJoinRoom }) {
           <span className="join-room-blob" key={index} />
         ))}
       </div>
+      <BlobAvatarScene className="join-avatar-scene" avatarIds={[2, 4]} />
       <button className="join-back-button" onClick={onBack} aria-label="Kembali ke pilihan room">
         &#10094;
       </button>

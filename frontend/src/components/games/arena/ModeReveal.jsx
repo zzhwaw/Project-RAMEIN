@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import './ModeReveal.css';
+import { BlobAvatarScene } from '../../BlobAvatars';
 
 const REVEAL_DURATION_MS = 3000;
 const RESULT_HOLD_MS = 2000;
@@ -59,6 +60,7 @@ export default function ModeReveal({ selectedMode, onComplete }) {
 
   return (
     <main className="mode-reveal-page" aria-live="polite">
+      <BlobAvatarScene className="reveal-avatar-scene" avatarIds={[1, 4]} />
       <div className="mode-reveal-spark mode-reveal-spark-one" aria-hidden="true">✦</div>
       <div className="mode-reveal-spark mode-reveal-spark-two" aria-hidden="true">✸</div>
       <p className="mode-reveal-eyebrow">RAMEIN • BABAK BERIKUTNYA</p>
