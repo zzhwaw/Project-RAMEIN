@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import './GameArena.css';
 import BlobAvatar, { BlobAvatarScene } from '../../BlobAvatars';
 import { getBlobAvatarId } from '../../blobAvatarUtils';
+import PlayerReactions from '../../PlayerReactions';
 import {
   MenghitungCepatQuiz,
   TebakGambarQuiz,
@@ -28,6 +29,8 @@ export default function GameArena({
   players = [],
   currentPlayerId,
   score = 0,
+  onReact,
+  reactionError,
 }) {
   const [result, setResult] = useState(null);
   const [answeredQuestions, setAnsweredQuestions] = useState(0);
@@ -119,7 +122,10 @@ export default function GameArena({
                 >
                   <span className="game-live-rank">{index + 1}</span>
                   <span className="game-live-avatar" aria-hidden="true">
-                    <BlobAvatar avatarId={getBlobAvatarId(player.id || player.name, index + 1)} size={32} />
+                    <BlobAvatar
+                      avatarId={player.avatarId || getBlobAvatarId(player.id || player.name, index + 1)}
+                      size={32}
+                    />
                   </span>
                   <span className="game-live-player-name">
                     {player.id === currentPlayerId ? 'Kamu' : (player.name || 'Pemain')}
@@ -154,6 +160,7 @@ export default function GameArena({
           </p>
         )}
       </div>
+      <PlayerReactions onReact={onReact} error={reactionError} />
       <p className="game-arena-caption">{quizName} • Mode {QUIZ_MODES[activeMode].label}</p>
     </main>
   );

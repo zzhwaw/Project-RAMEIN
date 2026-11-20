@@ -133,6 +133,61 @@
 
 .player-card-wrapper:nth-child(even) .player-card-avatar { animation-delay: -1.5s; }
 
+.avatar-picker {
+  min-width: 0;
+  padding: 8px 10px 10px;
+  border: 2px solid #292536;
+  border-radius: 15px;
+  background: #fff8df;
+  box-shadow: 3px 3px 0 #292536;
+}
+
+.avatar-picker legend {
+  padding: 0 6px;
+  color: #514a59;
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+.avatar-picker-options {
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  gap: 5px;
+}
+
+.avatar-picker-option {
+  min-width: 0;
+  display: grid;
+  place-items: center;
+  padding: 2px;
+  border: 2px solid transparent;
+  border-radius: 11px;
+  background: transparent;
+  cursor: pointer;
+  transition: transform 140ms ease, background-color 140ms ease, border-color 140ms ease;
+}
+
+.avatar-picker-option svg {
+  display: block;
+  width: 100%;
+  max-width: 54px;
+  height: auto;
+}
+
+.avatar-picker-option:hover { transform: translateY(-3px) rotate(-4deg); }
+
+.avatar-picker-option-selected {
+  border-color: #292536;
+  background: #b7eead;
+  box-shadow: 2px 2px 0 #292536;
+  transform: translateY(-2px);
+}
+
+.avatar-picker-option:focus-visible {
+  outline: 3px solid #168aad;
+  outline-offset: 2px;
+}
+
 .player-card-ready {
   border-color: #b7eead;
   box-shadow: 0 0 0 3px #2b2b2b, 0 0 0 7px #b7eead, 0 10px 0 #2b2b2b;
@@ -192,6 +247,7 @@
   .main-content { gap: 12px; padding: 18px 14px; }
   .landing-avatar-lineup { gap: 0; }
   .landing-avatar { width: clamp(32px, 10vw, 52px); }
+  .avatar-picker-options { grid-template-columns: repeat(4, minmax(0, 1fr)); }
   .landing-avatar-scene .blob-avatar-scene-character:nth-child(1) { bottom: 5%; left: 1%; }
   .landing-avatar-scene .blob-avatar-scene-character:nth-child(2) { top: 7%; right: 2%; }
   .landing-avatar-scene .blob-avatar-scene-character:nth-child(3) { right: 1%; bottom: 4%; }

@@ -1,0 +1,141 @@
+.player-reactions {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  max-width: 100%;
+  padding: 8px 11px;
+  border: 2px solid #292536;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 3px 3px 0 #292536;
+}
+
+.player-reactions-label {
+  color: #625c69;
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
+.player-reactions-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.player-reaction-button {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border: 2px solid #292536;
+  border-radius: 11px;
+  background: #ffefaa;
+  box-shadow: 2px 2px 0 #292536;
+  font-size: 1.15rem;
+  cursor: pointer;
+  transition: transform 120ms ease, box-shadow 120ms ease;
+}
+
+.player-reaction-button:nth-child(2n) { background: #ffd5ef; }
+.player-reaction-button:nth-child(3n) { background: #c9efff; }
+
+.player-reaction-button:hover {
+  transform: translateY(-2px) rotate(-5deg);
+  box-shadow: 3px 4px 0 #292536;
+}
+
+.player-reaction-button:active {
+  transform: translateY(1px);
+  box-shadow: 1px 1px 0 #292536;
+}
+
+.player-reaction-button:focus-visible {
+  outline: 3px solid #168aad;
+  outline-offset: 3px;
+}
+
+.player-reactions-error {
+  flex-basis: 100%;
+  color: #c62828;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-align: center;
+}
+
+.reaction-feed {
+  position: fixed;
+  z-index: 100;
+  top: max(16px, env(safe-area-inset-top));
+  right: max(16px, env(safe-area-inset-right));
+  display: grid;
+  justify-items: end;
+  gap: 8px;
+  width: min(280px, calc(100vw - 32px));
+  pointer-events: none;
+}
+
+.reaction-toast {
+  width: max-content;
+  max-width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px 6px 5px;
+  border: 3px solid #292536;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 4px 4px 0 #292536;
+  animation: reaction-toast-in 260ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.reaction-toast > svg {
+  flex: 0 0 38px;
+  width: 38px;
+  height: 38px;
+}
+
+.reaction-toast-message {
+  min-width: 0;
+  display: grid;
+  justify-items: start;
+  gap: 0;
+}
+
+.reaction-toast-message strong {
+  max-width: 185px;
+  overflow: hidden;
+  color: #514a59;
+  font-size: 0.72rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.reaction-toast-message span {
+  font-size: 1.35rem;
+  line-height: 1;
+}
+
+@keyframes reaction-toast-in {
+  from { opacity: 0; transform: translateX(24px) scale(0.85); }
+  to { opacity: 1; transform: translateX(0) scale(1); }
+}
+
+@media (max-width: 520px) {
+  .player-reactions {
+    gap: 5px;
+    padding: 6px 8px;
+  }
+  .player-reaction-button {
+    width: 32px;
+    height: 32px;
+    font-size: 1rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reaction-toast { animation: none; }
+  .player-reaction-button { transition: none; }
+}

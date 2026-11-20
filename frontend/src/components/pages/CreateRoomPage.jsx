@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { BlobAvatarScene } from '../BlobAvatars';
+import AvatarPicker from '../AvatarPicker';
 
 const GAME_MODES = [
   { value: 'gambar', label: 'Tebak Gambar' },
@@ -11,6 +12,7 @@ const GAME_MODES = [
 export default function CreateRoomPage({ className = '', onBack, onCreateRoom }) {
   const [roomName, setRoomName] = useState('');
   const [playerName, setPlayerName] = useState('');
+  const [avatarId, setAvatarId] = useState(1);
   const [capacity, setCapacity] = useState('6');
   const [difficulty, setDifficulty] = useState('medium');
   const [modeSelection, setModeSelection] = useState('random');
@@ -24,6 +26,7 @@ export default function CreateRoomPage({ className = '', onBack, onCreateRoom })
     const result = await onCreateRoom({
       roomName,
       playerName,
+      avatarId,
       capacity: Number(capacity),
       difficulty,
       modeSelection,
@@ -74,6 +77,8 @@ export default function CreateRoomPage({ className = '', onBack, onCreateRoom })
               onChange={(event) => setPlayerName(event.target.value)}
               required
             />
+
+            <AvatarPicker value={avatarId} onChange={setAvatarId} />
 
             <label htmlFor="player-count">Kapasitas pemain</label>
             <select
