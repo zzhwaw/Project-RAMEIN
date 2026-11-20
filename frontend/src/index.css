@@ -1593,6 +1593,54 @@ body {
   color: #716b79;
 }
 
+.scoreboard-awards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px), 1fr));
+  gap: 9px;
+  margin: 0 0 20px;
+}
+
+.scoreboard-award {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 10px 12px;
+  border: 2px solid var(--score-ink);
+  border-radius: 15px;
+  background: #dff4ff;
+  box-shadow: 3px 3px 0 var(--score-ink);
+}
+
+.scoreboard-award:nth-child(2) { background: #ffdcf0; }
+.scoreboard-award:nth-child(3) { background: #e2f6d8; }
+
+.scoreboard-award-icon {
+  flex: 0 0 auto;
+  font-size: 1.45rem;
+}
+
+.scoreboard-award-info {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.scoreboard-award-info strong {
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.7px;
+}
+
+.scoreboard-award-info span {
+  overflow: hidden;
+  color: #625c69;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .scoreboard-continue {
   width: 100%;
   min-height: 52px;

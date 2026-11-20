@@ -33,6 +33,9 @@ const GAME_DIFFICULTIES = ['easy', 'medium', 'hard'];
 const QUESTION_BASE_POINTS = 100;
 const MAX_SPEED_BONUS = 50;
 const SPEED_BONUS_WINDOW_MS = 5_000;
+const PLAYER_AVATAR_COUNT = 8;
+const REACTION_COOLDOWN_MS = 1_000;
+const PLAYER_REACTIONS = ['👏', '😂', '🔥', '💖', '😱', '🎉'];
 const DRAW_WORDS = [
   'Sapi', 'Sepeda', 'Pohon', 'Pesawat', 'Pelangi', 'Kucing', 'Bintang', 'Es krim',
   'Pisang', 'Gitar', 'Payung', 'Kapal', 'Kacamata', 'Kupu-kupu', 'Gunung', 'Roket',
@@ -44,6 +47,10 @@ function cleanText(value, maxLength) {
   return typeof value === 'string'
     ? value.trim().replace(/[\u0000-\u001f\u007f]/g, '').slice(0, maxLength)
     : '';
+}
+
+function getAvatarId(value) {
+  return Number.isInteger(value) && value >= 1 && value <= PLAYER_AVATAR_COUNT ? value : 1;
 }
 
 function createRoomId() {
@@ -218,6 +225,7 @@ io.on('connection', (socket) => {
   socket.on('room:create', (payload = {}, callback = () => {}) => {
     const playerName = cleanText(payload.playerName, 24);
     const roomName = cleanText(payload.roomName, 30);
+    const avatarId = getAvatarId(payload.avatarId);
     const capacity = Number(payload.capacity);
     const difficulty = payload.difficulty ?? 'medium';
     const modeSelection = payload.modeSelection ?? 'random';
@@ -244,6 +252,7 @@ io.on('connection', (socket) => {
     const player = {
       id: socket.id,
       name: playerName,
+      avatarId,
       isHost: true,
       ready: false,
       score: 0,
@@ -275,6 +284,7 @@ io.on('connection', (socket) => {
   socket.on('room:join', (payload = {}, callback = () => {}) => {
     const playerName = cleanText(payload.playerName, 24);
     const roomId = cleanText(payload.roomId, 6).toUpperCase();
+    const avatarId = getAvatarId(payload.avatarId);
     const room = rooms.get(roomId);
 
     if (!playerName || !/^[A-Z0-9]{6}$/.test(roomId)) {
@@ -302,6 +312,7 @@ io.on('connection', (socket) => {
     const player = {
       id: socket.id,
       name: playerName,
+      avatarId,
       isHost: false,
       ready: false,
       score: 0,
@@ -373,6 +384,33 @@ io.on('connection', (socket) => {
     player.ready = Boolean(payload.ready);
     broadcastRoom(room);
     callback({ room: getRoomSnapshot(room) });
+  });
+
+  socket.on('player:reaction', (payload = {}, callback = () => {}) => {
+    const room = rooms.get(socket.data.roomId);
+    const player = room?.players.get(socket.id);
+    if (!room || !player || !['lobby', 'playing'].includes(room.phase)) {
+      callback({ error: 'Reaksi hanya dapat dikirim saat berada di room.' });
+      return;
+    }
+    if (!PLAYER_REACTIONS.includes(payload.emoji)) {
+      callback({ error: 'Reaksi tidak tersedia.' });
+      return;
+    }
+    const now = Date.now();
+    if (now - (socket.data.lastReactionAt || 0) < REACTION_COOLDOWN_MS) {
+      callback({ error: 'Tunggu sebentar sebelum mengirim reaksi lagi.' });
+      return;
+    }
+    socket.data.lastReactionAt = now;
+    io.to(room.id).emit('player:reaction', {
+      id: `${now}-${socket.id}`,
+      playerId: socket.id,
+      playerName: player.name,
+      avatarId: player.avatarId,
+      emoji: payload.emoji,
+    });
+    callback({ ok: true });
   });
 
   socket.on('game:start', (payload = {}, callback = () => {}) => {

@@ -24,6 +24,34 @@ export default function ScoreboardPage({ roomName, players = [], reason, mode, o
   };
   const resultMessage = resultMessages[reason] || 'Permainan berakhir. Ini hasil akhirnya!';
   const podiumPlayers = ranking.slice(0, 3);
+  const accuracyAward = !isDrawMode
+    ? ranking
+      .filter((player) => Number(player.answeredQuestions) > 0)
+      .sort((first, second) => (
+        (Number(second.correctAnswers) / Number(second.answeredQuestions))
+        - (Number(first.correctAnswers) / Number(first.answeredQuestions))
+      ))[0]
+    : null;
+  const speedAward = !isDrawMode
+    ? [...ranking].sort((first, second) => (
+      (Number(second.speedBonus) || 0) - (Number(first.speedBonus) || 0)
+    ))[0]
+    : null;
+  const awards = [
+    winner && { player: winner, label: 'JUARA POIN', detail: 'Skor tertinggi', icon: '🏆' },
+    accuracyAward && Number(accuracyAward.correctAnswers) > 0 && {
+      player: accuracyAward,
+      label: 'PALING AKURAT',
+      detail: `${Math.round((Number(accuracyAward.correctAnswers) / Number(accuracyAward.answeredQuestions)) * 100)}% jawaban benar`,
+      icon: '🎯',
+    },
+    speedAward && Number(speedAward.speedBonus) > 0 && {
+      player: speedAward,
+      label: 'PALING SIGAP',
+      detail: `+${Number(speedAward.speedBonus) || 0} poin kecepatan`,
+      icon: '⚡',
+    },
+  ].filter(Boolean);
 
   return (
     <main className="scoreboard-page">
@@ -58,7 +86,7 @@ export default function ScoreboardPage({ roomName, players = [], reason, mode, o
                     {rank === 1 ? '👑' : rank === 2 ? '🥈' : '🥉'}
                   </span>
                   <span className="scoreboard-podium-avatar" aria-hidden="true">
-                    <BlobAvatar avatarId={getBlobAvatarId(player.id || player.name)} size={60} />
+                    <BlobAvatar avatarId={player.avatarId || getBlobAvatarId(player.id || player.name)} size={60} />
                   </span>
                   <strong className="scoreboard-podium-name">{player.name || 'Pemain'}</strong>
                   <span className="scoreboard-podium-score">{Number(player.score) || 0} poin</span>
@@ -73,7 +101,7 @@ export default function ScoreboardPage({ roomName, players = [], reason, mode, o
           <section className="scoreboard-winner" aria-label={`Juara satu: ${winner.name || 'Pemain'}`}>
             <span className="scoreboard-winner-crown" aria-hidden="true">👑</span>
             <span className="scoreboard-winner-avatar" aria-hidden="true">
-              <BlobAvatar avatarId={getBlobAvatarId(winner.id || winner.name)} size={78} />
+              <BlobAvatar avatarId={winner.avatarId || getBlobAvatarId(winner.id || winner.name)} size={78} />
             </span>
             <span className="scoreboard-winner-label">JUARA 1</span>
             <strong className="scoreboard-winner-name">{winner.name || 'Pemain'}</strong>
@@ -90,6 +118,20 @@ export default function ScoreboardPage({ roomName, players = [], reason, mode, o
           </section>
         )}
 
+        {awards.length > 0 && (
+          <section className="scoreboard-awards" aria-label="Penghargaan pertandingan">
+            {awards.map((award) => (
+              <article className="scoreboard-award" key={`${award.label}-${award.player.id || award.player.name}`}>
+                <span className="scoreboard-award-icon" aria-hidden="true">{award.icon}</span>
+                <span className="scoreboard-award-info">
+                  <strong>{award.label}</strong>
+                  <span>{award.player.name || 'Pemain'} · {award.detail}</span>
+                </span>
+              </article>
+            ))}
+          </section>
+        )}
+
         <ol className="scoreboard-list" aria-label="Peringkat pemain">
           {ranking.map((player, index) => {
             const rank = index + 1;
@@ -101,7 +143,7 @@ export default function ScoreboardPage({ roomName, players = [], reason, mode, o
                   {rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : rank}
                 </span>
                 <span className="scoreboard-player-avatar" aria-hidden="true">
-                  <BlobAvatar avatarId={getBlobAvatarId(player.id || player.name)} size={42} />
+                  <BlobAvatar avatarId={player.avatarId || getBlobAvatarId(player.id || player.name)} size={42} />
                 </span>
                 <span className="scoreboard-player-info">
                   <strong>{player.name || 'Pemain'}</strong>

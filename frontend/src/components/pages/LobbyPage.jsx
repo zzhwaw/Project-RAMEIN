@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import BlobAvatar from '../BlobAvatars';
 import { getBlobAvatarId } from '../blobAvatarUtils';
+import PlayerReactions from '../PlayerReactions';
 
 const cardColors = ['card-pink', 'card-blue', 'card-yellow', 'card-red', 'card-green', 'card-black'];
 const gameModes = [
@@ -21,6 +22,8 @@ export default function LobbyPage({
   onSetReady,
   onStartGame,
   onUpdateSettings,
+  onReact,
+  reactionError,
   className = '',
 }) {
   const [message, setMessage] = useState('');
@@ -159,7 +162,7 @@ export default function LobbyPage({
               <div className={`player-card ${colorClass}${player?.ready ? ' player-card-ready' : ''}`} aria-hidden="true">
                 {player && (
                   <span className="player-card-avatar">
-                    <BlobAvatar avatarId={getBlobAvatarId(player.id, index + 1)} size={140} />
+                    <BlobAvatar avatarId={player.avatarId || getBlobAvatarId(player.id, index + 1)} size={140} />
                   </span>
                 )}
                 {player?.isHost && <span className="player-host-badge">HOST</span>}
@@ -181,6 +184,7 @@ export default function LobbyPage({
             ? `Semua ${roomPlayers.length} pemain siap`
             : `${readyPlayersCount}/${roomPlayers.length} pemain siap • minimal ${minimumPlayers} pemain`}
         </p>
+        <PlayerReactions onReact={onReact} error={reactionError} />
         {message && <p className="lobby-message" role="alert">{message}</p>}
         <button
           className={`lobby-ready-button ${currentPlayer?.ready ? 'lobby-ready-active' : ''}`}

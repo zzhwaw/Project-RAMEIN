@@ -457,6 +457,14 @@
   font-weight: 700;
 }
 
+.draw-game > .player-reactions {
+  position: relative;
+  z-index: 1;
+  width: fit-content;
+  max-width: 100%;
+  margin: 14px auto 0;
+}
+
 .draw-sr-only {
   position: absolute;
   width: 1px;

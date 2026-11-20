@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import './DrawAndGuess.css';
 import BlobAvatar, { BlobAvatarScene } from '../../BlobAvatars';
 import { getBlobAvatarId } from '../../blobAvatarUtils';
+import PlayerReactions from '../../PlayerReactions';
 
 const COLORS = ['#292536', '#ef476f', '#ff9f1c', '#ffd166', '#06a77d', '#168aad', '#4361ee', '#9b5de5'];
 const MIN_TOOL_SIZE = 1;
@@ -27,7 +28,15 @@ function paintSegment(context, segment, width, height) {
   context.restore();
 }
 
-export default function DrawAndGuess({ socket, game, timeLeft, players = [], currentPlayerId }) {
+export default function DrawAndGuess({
+  socket,
+  game,
+  timeLeft,
+  players = [],
+  currentPlayerId,
+  onReact,
+  reactionError,
+}) {
   const canvasRef = useRef(null);
   const lastPointRef = useRef(null);
   const isDrawingRef = useRef(false);
@@ -354,7 +363,11 @@ export default function DrawAndGuess({ socket, game, timeLeft, players = [], cur
             {chatMessages.map((message) => (
               <p className={`draw-chat-message${message.isCorrect ? ' draw-chat-correct' : ''}`} key={message.id}>
                 <span className="draw-chat-avatar" aria-hidden="true">
-                  <BlobAvatar avatarId={getBlobAvatarId(message.playerId)} size={38} />
+                  <BlobAvatar
+                    avatarId={players.find((player) => player.id === message.playerId)?.avatarId
+                      || getBlobAvatarId(message.playerId)}
+                    size={38}
+                  />
                 </span>
                 <strong>{message.playerName}</strong>
                 <span>{message.text}</span>
@@ -381,6 +394,7 @@ export default function DrawAndGuess({ socket, game, timeLeft, players = [], cur
         </aside>
       </div>
 
+      <PlayerReactions onReact={onReact} error={reactionError} />
       <footer className="draw-footer">
         <span>10 GILIRAN • 1 MENIT TIAP GILIRAN</span>
         <span>Skor diperbarui otomatis saat jawaban benar.</span>

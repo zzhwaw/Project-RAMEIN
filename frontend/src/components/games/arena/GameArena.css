@@ -78,6 +78,12 @@
 .game-arena-score strong { font-size: 1.1rem; }
 .game-arena-score small { font-size: 0.68rem; }
 
+.game-arena > .player-reactions {
+  position: relative;
+  z-index: 1;
+  margin-bottom: 8px;
+}
+
 .game-arena-body {
   width: min(100%, 760px);
   min-width: 0;

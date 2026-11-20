@@ -9,6 +9,7 @@ import ScoreboardPage from './components/pages/ScoreboardPage';
 import GameArena from './components/games/arena/GameArena';
 import DrawAndGuess from './components/games/arena/DrawAndGuess';
 import ModeReveal from './components/games/arena/ModeReveal';
+import { ReactionFeed } from './components/PlayerReactions';
 
 const PAGE_TRANSITION_MS = 700;
 
@@ -19,14 +20,26 @@ export default function App() {
   const [game, setGame] = useState(null);
   const [finalStandings, setFinalStandings] = useState(null);
   const [timeLeft, setTimeLeft] = useState(0);
+  const [reactions, setReactions] = useState([]);
+  const [reactionError, setReactionError] = useState('');
   const [lobbyOrigin, setLobbyOrigin] = useState('create');
   const [socket] = useState(() => io(import.meta.env.VITE_SOCKET_URL || 'http://localhost:3001', {
     autoConnect: false,
   }));
   const navigationTimeout = useRef(null);
+  const reactionTimeouts = useRef(new Map());
 
   useEffect(() => {
+    const reactionTimers = reactionTimeouts.current;
     const handleRoomUpdate = (updatedRoom) => setRoom(updatedRoom);
+    const handlePlayerReaction = (reaction) => {
+      setReactions((current) => [...current, reaction].slice(-4));
+      const timeoutId = window.setTimeout(() => {
+        setReactions((current) => current.filter((entry) => entry.id !== reaction.id));
+        reactionTimeouts.current.delete(reaction.id);
+      }, 3500);
+      reactionTimeouts.current.set(reaction.id, timeoutId);
+    };
     const handleGameStarted = (startedGame) => {
       const synchronizedGame = {
         ...startedGame,
@@ -51,12 +64,16 @@ export default function App() {
     };
 
     socket.on('room:updated', handleRoomUpdate);
+    socket.on('player:reaction', handlePlayerReaction);
     socket.on('game:started', handleGameStarted);
     socket.on('game:ended', handleGameEnded);
 
     return () => {
       window.clearTimeout(navigationTimeout.current);
+      reactionTimers.forEach((timeoutId) => window.clearTimeout(timeoutId));
+      reactionTimers.clear();
       socket.off('room:updated', handleRoomUpdate);
+      socket.off('player:reaction', handlePlayerReaction);
       socket.off('game:started', handleGameStarted);
       socket.off('game:ended', handleGameEnded);
       socket.disconnect();
@@ -132,6 +149,13 @@ export default function App() {
   const handleSetReady = (ready) => requestRoom('player:ready', { ready });
   const handleUpdateRoomSettings = (settings) => requestRoom('room:update-settings', settings);
   const handleStartGame = () => requestRoom('game:start', {});
+  const handleSendReaction = (emoji) => {
+    setReactionError('');
+    socket.timeout(4000).emit('player:reaction', { emoji }, (error, result) => {
+      if (error) setReactionError('Reaksi gagal dikirim. Coba lagi.');
+      else if (result?.error) setReactionError(result.error);
+    });
+  };
   const handleGameAnswer = (progress) => {
     if (!game) return;
     socket.emit('game:answer', { roundId: game.roundId, ...progress });
@@ -225,6 +249,8 @@ export default function App() {
           onSetReady={handleSetReady}
           onStartGame={handleStartGame}
           onUpdateSettings={handleUpdateRoomSettings}
+          onReact={handleSendReaction}
+          reactionError={reactionError}
         />
       )}
       {page === 'modeReveal' && game && (
@@ -243,6 +269,8 @@ export default function App() {
             timeLeft={timeLeft}
             players={room?.players || []}
             currentPlayerId={socket.id}
+            onReact={handleSendReaction}
+            reactionError={reactionError}
           />
         ) : (
           <GameArena
@@ -255,6 +283,8 @@ export default function App() {
             players={room?.players || []}
             currentPlayerId={socket.id}
             score={room?.players.find((player) => player.id === socket.id)?.score || 0}
+            onReact={handleSendReaction}
+            reactionError={reactionError}
             onAnswer={handleGameAnswer}
             onProgress={handleGameProgress}
           />
@@ -269,6 +299,7 @@ export default function App() {
           onContinue={() => setPage('lobby')}
         />
       )}
+      <ReactionFeed reactions={reactions} />
     </div>
   );
 }

@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { BlobAvatarScene } from '../BlobAvatars';
+import AvatarPicker from '../AvatarPicker';
 
 export default function JoinRoomPage({ className = '', onBack, onJoinRoom }) {
   const [roomCode, setRoomCode] = useState('');
   const [playerName, setPlayerName] = useState('');
+  const [avatarId, setAvatarId] = useState(1);
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -14,6 +16,7 @@ export default function JoinRoomPage({ className = '', onBack, onJoinRoom }) {
     const result = await onJoinRoom({
       roomId: roomCode.trim().toUpperCase(),
       playerName,
+      avatarId,
     });
     if (result.error) setError(result.error);
     setIsSubmitting(false);
@@ -72,6 +75,7 @@ export default function JoinRoomPage({ className = '', onBack, onJoinRoom }) {
               onChange={(event) => setPlayerName(event.target.value)}
               required
             />
+            <AvatarPicker value={avatarId} onChange={setAvatarId} />
             {error && <p className="room-form-error" id="join-room-status" role="alert">{error}</p>}
             <button className="join-room-submit" type="submit" disabled={isSubmitting}>
               {isSubmitting ? 'GABUNG...' : 'GABUNG & MASUK LOBBY'}
