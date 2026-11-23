@@ -1275,7 +1275,7 @@ body {
 .scoreboard-content {
   position: relative;
   z-index: 1;
-  width: min(100%, 620px);
+  width: min(100%, 800px);
   margin: auto;
   padding: clamp(24px, 5vw, 38px);
   border: 3px solid var(--score-ink);
@@ -1319,273 +1319,186 @@ body {
   font-size: 0.94rem;
 }
 
-.scoreboard-podium {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  align-items: end;
-  gap: 8px;
-  margin: 4px 0 26px;
-  padding: 18px 8px 0;
-}
-
-.scoreboard-podium-place {
-  position: relative;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 5px;
-}
-
-.scoreboard-podium-place-1 { order: 2; }
-.scoreboard-podium-place-2 { order: 1; }
-.scoreboard-podium-place-3 { order: 3; }
-
-.scoreboard-podium-medal {
-  position: absolute;
-  top: -16px;
-  z-index: 1;
-  font-size: 1.55rem;
-  filter: drop-shadow(2px 2px 0 rgba(41, 37, 54, 0.22));
-  animation: scoreboard-medal-bob 1.7s ease-in-out infinite alternate;
-}
-
-.scoreboard-podium-place-2 .scoreboard-podium-medal { animation-delay: -0.5s; }
-.scoreboard-podium-place-3 .scoreboard-podium-medal { animation-delay: -1s; }
-
-.scoreboard-podium-avatar {
-  width: clamp(40px, 8vw, 58px);
-  height: clamp(40px, 8vw, 58px);
-  display: grid;
-  place-items: center;
-  border: 3px solid var(--score-ink);
-  border-radius: 19px;
-  background: #ff72c6;
-  box-shadow: 3px 3px 0 var(--score-ink);
-  color: #fff;
-  font-size: 1.35rem;
-  font-weight: 900;
-  transform: rotate(-4deg);
-}
-
-.scoreboard-podium-place-1 .scoreboard-podium-avatar { background: #ffcd38; }
-.scoreboard-podium-place-2 .scoreboard-podium-avatar { background: #4fc4ff; }
-.scoreboard-podium-place-3 .scoreboard-podium-avatar { background: #ff9f1c; }
-
-.scoreboard-podium-name {
-  width: 100%;
-  overflow: hidden;
-  font-size: clamp(0.7rem, 2.5vw, 0.9rem);
-  font-weight: 900;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.scoreboard-podium-score {
-  color: #625c69;
-  font-size: 0.68rem;
-  font-weight: 800;
-  font-variant-numeric: tabular-nums;
-}
-
-.scoreboard-podium-block {
-  width: 100%;
-  height: 62px;
-  display: grid;
-  place-items: center;
-  border: 3px solid var(--score-ink);
-  border-bottom: 0;
-  border-radius: 13px 13px 0 0;
-  background: #cbd9ed;
-  box-shadow: 4px 0 0 var(--score-ink);
-  font-size: 1.65rem;
-  font-weight: 900;
-}
-
-.scoreboard-podium-place-1 .scoreboard-podium-block {
-  height: 94px;
-  background: linear-gradient(145deg, #ffe68a, #ffca38);
-}
-
-.scoreboard-podium-place-3 .scoreboard-podium-block {
-  height: 46px;
-  background: #ffc18b;
-}
-
-.scoreboard-winner {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 5px;
-  margin: 0 0 22px;
-  padding: 22px 18px 18px;
-  border: 3px solid var(--score-ink);
-  border-radius: 22px;
-  background:
-    radial-gradient(circle at 50% 25%, rgba(255, 255, 255, 0.8), transparent 38%),
-    linear-gradient(145deg, #ffe68a, #ffca38);
-  box-shadow: 5px 5px 0 var(--score-ink);
-}
-
-.scoreboard-winner-crown {
-  position: absolute;
-  top: -19px;
-  left: calc(50% - 19px);
-  width: 38px;
-  height: 38px;
-  display: grid;
-  place-items: center;
+.scoreboard-chart {
+  margin: 8px 0 22px;
+  padding: clamp(14px, 3vw, 22px);
   border: 2px solid var(--score-ink);
-  border-radius: 50%;
-  background: #fff;
-  font-size: 1.3rem;
-  box-shadow: 2px 2px 0 var(--score-ink);
-}
-
-.scoreboard-winner-avatar {
-  width: 74px;
-  height: 74px;
-  display: grid;
-  place-items: center;
-  margin: 4px 0 3px;
-  border: 3px solid var(--score-ink);
-  border-radius: 24px;
-  background: #ff72c6;
-  color: #fff;
-  font-size: 2rem;
-  font-weight: 900;
+  border-radius: 20px;
+  background: #fbf9ff;
   box-shadow: 4px 4px 0 var(--score-ink);
-  transform: rotate(-4deg);
-}
-
-.scoreboard-winner-label {
-  color: #635313;
-  font-size: 0.72rem;
-  font-weight: 900;
-  letter-spacing: 2px;
-}
-
-.scoreboard-winner-name {
-  max-width: 100%;
-  overflow-wrap: anywhere;
-  font-size: clamp(1.35rem, 5vw, 1.8rem);
-  font-weight: 900;
-}
-
-.scoreboard-winner-score {
-  color: #4e3a00;
-  font-size: 1.2rem;
-  font-weight: 900;
-  font-variant-numeric: tabular-nums;
-}
-
-.scoreboard-winner-breakdown {
-  color: #635313;
-  font-size: 0.82rem;
-  font-weight: 800;
-}
-
-.scoreboard-list {
-  display: grid;
-  gap: 9px;
-  padding: 0;
-  list-style: none;
   text-align: left;
 }
 
-.scoreboard-player {
-  min-height: 66px;
+.scoreboard-chart-heading {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
+  justify-content: space-between;
   gap: 12px;
-  padding: 9px 13px;
-  border: 2px solid var(--score-ink);
-  border-radius: 16px;
-  background: #f2eff7;
-  box-shadow: 3px 3px 0 var(--score-ink);
+  margin-bottom: 16px;
 }
 
-.score-rank-first { background: #fff0ae; }
-.score-rank-second { background: #eaf3fa; }
-.score-rank-third { background: #ffe4d2; }
-
-.scoreboard-rank {
-  width: 33px;
-  flex: 0 0 33px;
-  text-align: center;
-  font-size: 1.35rem;
+.scoreboard-chart-heading h2 {
+  font-size: clamp(1rem, 3vw, 1.25rem);
   font-weight: 900;
 }
 
-.score-rank-default .scoreboard-rank {
-  color: #625c69;
-  font-size: 1rem;
+.scoreboard-chart-heading p {
+  margin-top: 3px;
+  color: #716b79;
+  font-size: 0.75rem;
+  font-weight: 700;
 }
 
-.scoreboard-player-avatar {
-  width: 40px;
-  height: 40px;
-  flex: 0 0 40px;
+.scoreboard-chart-max {
+  flex: 0 0 auto;
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: #ffedaa;
+  font-size: 0.68rem;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.scoreboard-chart-list {
   display: grid;
-  place-items: center;
-  border: 2px solid var(--score-ink);
-  border-radius: 13px;
-  background: #ff72c6;
-  color: #fff;
-  font-size: 1.1rem;
-  font-weight: 900;
+  gap: 11px;
+  padding: 0;
+  list-style: none;
+}
+
+.scoreboard-chart-row {
+  min-width: 0;
+  padding: 10px 12px;
+  border: 2px solid #e6e0ed;
+  border-radius: 15px;
+  background: #fff;
+}
+
+.scoreboard-chart-row-first {
+  border-color: var(--score-ink);
+  background: #fff8df;
   box-shadow: 2px 2px 0 var(--score-ink);
 }
 
-.scoreboard-player:nth-child(2) .scoreboard-player-avatar { background: #4fc4ff; }
-.scoreboard-player:nth-child(3) .scoreboard-player-avatar { background: #f4c834; }
-.scoreboard-player:nth-child(4) .scoreboard-player-avatar { background: #73cf85; }
-.scoreboard-player:nth-child(5) .scoreboard-player-avatar { background: #ed6a61; }
-.scoreboard-player:nth-child(6) .scoreboard-player-avatar { background: #7466b4; }
-
-.scoreboard-player-info {
+.scoreboard-chart-player {
   min-width: 0;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
+  display: grid;
+  grid-template-columns: 30px 42px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
 }
 
-.scoreboard-player-info strong {
+.scoreboard-chart-rank {
+  color: #625c69;
+  font-size: 1.05rem;
+  font-weight: 900;
+  text-align: center;
+}
+
+.scoreboard-chart-avatar {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+}
+
+.scoreboard-chart-avatar svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.scoreboard-chart-name {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.scoreboard-chart-name strong {
   overflow: hidden;
-  color: var(--score-ink);
-  font-size: 0.98rem;
+  font-size: 0.92rem;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.scoreboard-player-info small {
+.scoreboard-chart-name small {
   color: #716b79;
-  font-size: 0.68rem;
+  font-size: 0.62rem;
   font-weight: 900;
-  letter-spacing: 0.8px;
+  letter-spacing: 0.5px;
 }
 
-.scoreboard-player-info .scoreboard-player-bonus {
-  color: #357344;
-  font-size: 0.65rem;
-  letter-spacing: 0;
-}
-
-.scoreboard-player-score {
-  flex: 0 0 auto;
+.scoreboard-chart-score {
   color: var(--score-ink);
-  font-size: 1.05rem;
-  font-weight: 900;
-  text-align: right;
+  font-size: 1rem;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
-.scoreboard-player-score small {
-  display: block;
+.scoreboard-chart-score small {
   color: #716b79;
-  font-size: 0.57rem;
-  letter-spacing: 1px;
+  font-size: 0.64rem;
+}
+
+.scoreboard-chart-track {
+  height: 15px;
+  overflow: hidden;
+  margin: 8px 0 7px 38px;
+  border: 2px solid var(--score-ink);
+  border-radius: 999px;
+  background:
+    repeating-linear-gradient(
+      90deg,
+      #f3eff8 0,
+      #f3eff8 calc(25% - 1px),
+      #ded7e8 calc(25% - 1px),
+      #ded7e8 25%
+    );
+}
+
+.scoreboard-chart-bar {
+  display: block;
+  height: 100%;
+  min-width: 0;
+  border-radius: inherit;
+  background: #8cddff;
+  transform: scaleX(0);
+  transform-origin: left center;
+  animation: scoreboard-bar-fill 750ms cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+.scoreboard-chart-row:nth-child(1) .scoreboard-chart-bar { background: linear-gradient(90deg, #ffca38, #ffe68a); }
+.scoreboard-chart-row:nth-child(2) .scoreboard-chart-bar { background: linear-gradient(90deg, #4fc4ff, #a4e7ff); }
+.scoreboard-chart-row:nth-child(3) .scoreboard-chart-bar { background: linear-gradient(90deg, #ff72c6, #ffc0e5); }
+.scoreboard-chart-row:nth-child(4) .scoreboard-chart-bar { background: linear-gradient(90deg, #73cf85, #b7eead); }
+.scoreboard-chart-row:nth-child(5) .scoreboard-chart-bar { background: linear-gradient(90deg, #ff9f1c, #ffd08a); }
+.scoreboard-chart-row:nth-child(6) .scoreboard-chart-bar { background: linear-gradient(90deg, #9b83e5, #d0c3ff); }
+
+.scoreboard-chart-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px 12px;
+  margin-left: 38px;
+  color: #625c69;
+  font-size: 0.67rem;
+  font-weight: 700;
+}
+
+.scoreboard-chart-details > span {
+  padding: 3px 7px;
+  border-radius: 999px;
+  background: #f1edf8;
+}
+
+.scoreboard-chart-row-first .scoreboard-chart-details > span { background: #ffedaa; }
+
+.scoreboard-chart-scale {
+  display: flex;
+  justify-content: space-between;
+  margin: 7px 0 0 38px;
+  color: #716b79;
+  font-size: 0.64rem;
+  font-weight: 800;
 }
 
 .scoreboard-empty {
@@ -1691,31 +1604,36 @@ body {
   to { transform: scale(1.12) rotate(12deg); opacity: 1; }
 }
 
-@keyframes scoreboard-medal-bob {
-  to { transform: translateY(-5px) rotate(8deg); }
+@keyframes scoreboard-bar-fill {
+  to { transform: scaleX(1); }
 }
 
 @media (max-width: 520px) {
   .scoreboard-page { padding: 82px 16px 24px; }
   .scoreboard-header { top: 18px; left: 18px; right: 18px; }
   .scoreboard-content { padding: 22px 16px; border-radius: 22px; box-shadow: 6px 6px 0 var(--score-ink); }
-  .scoreboard-podium { gap: 5px; padding-right: 0; padding-left: 0; }
-  .scoreboard-podium-block { height: 48px; }
-  .scoreboard-podium-place-1 .scoreboard-podium-block { height: 72px; }
-  .scoreboard-podium-place-3 .scoreboard-podium-block { height: 38px; }
-  .scoreboard-podium-score { font-size: 0.6rem; }
-  .scoreboard-player { min-height: 60px; gap: 9px; padding: 8px; }
-  .scoreboard-player-avatar { width: 36px; height: 36px; flex-basis: 36px; }
-  .scoreboard-player-info strong { font-size: 0.88rem; }
-  .scoreboard-player-score { font-size: 0.92rem; }
+  .scoreboard-chart { padding: 12px 9px; }
+  .scoreboard-chart-heading { align-items: flex-start; }
+  .scoreboard-chart-heading p { max-width: 200px; font-size: 0.68rem; }
+  .scoreboard-chart-max { padding: 5px 7px; font-size: 0.6rem; }
+  .scoreboard-chart-row { padding: 9px 8px; }
+  .scoreboard-chart-player { grid-template-columns: 24px 36px minmax(0, 1fr) auto; gap: 6px; }
+  .scoreboard-chart-avatar { width: 36px; height: 36px; }
+  .scoreboard-chart-name strong { font-size: 0.82rem; }
+  .scoreboard-chart-name small { font-size: 0.57rem; }
+  .scoreboard-chart-score { font-size: 0.84rem; }
+  .scoreboard-chart-score small { display: block; font-size: 0.56rem; }
+  .scoreboard-chart-track { height: 13px; margin-left: 30px; }
+  .scoreboard-chart-details,
+  .scoreboard-chart-scale { margin-left: 30px; font-size: 0.61rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .scoreboard-confetti-piece,
-  .scoreboard-spark,
-  .scoreboard-podium-medal {
+  .scoreboard-spark {
     animation: none;
   }
+  .scoreboard-chart-bar { animation: none; transform: scaleX(1); }
   .scoreboard-decoration,
   .scoreboard-content {
     animation: none;

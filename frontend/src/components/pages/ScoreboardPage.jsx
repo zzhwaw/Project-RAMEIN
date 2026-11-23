@@ -1,12 +1,8 @@
 import BlobAvatar from '../BlobAvatars';
 import { getBlobAvatarId } from '../blobAvatarUtils';
 
-const podiumStyles = {
-  1: 'score-rank-first',
-  2: 'score-rank-second',
-  3: 'score-rank-third',
-};
 const TOTAL_QUESTIONS = 20;
+const numberFormat = new Intl.NumberFormat('id-ID');
 
 export default function ScoreboardPage({ roomName, players = [], reason, mode, onContinue }) {
   const isDrawMode = mode === 'gambar-tebak';
@@ -23,7 +19,7 @@ export default function ScoreboardPage({ roomName, players = [], reason, mode, o
     'all-players-left': 'Permainan berakhir. Ini hasil skor terakhir.',
   };
   const resultMessage = resultMessages[reason] || 'Permainan berakhir. Ini hasil akhirnya!';
-  const podiumPlayers = ranking.slice(0, 3);
+  const maxScore = Math.max(1, ...ranking.map((player) => Number(player.score) || 0));
   const accuracyAward = !isDrawMode
     ? ranking
       .filter((player) => Number(player.answeredQuestions) > 0)
@@ -76,45 +72,83 @@ export default function ScoreboardPage({ roomName, players = [], reason, mode, o
         <h1 id="scoreboard-title">Papan Juara</h1>
         <p className="scoreboard-description">{resultMessage}</p>
 
-        {podiumPlayers.length > 1 && (
-          <section className="scoreboard-podium" aria-label="Podium tiga besar">
-            {[podiumPlayers[1], podiumPlayers[0], podiumPlayers[2]].filter(Boolean).map((player, index) => {
-              const rank = index === 1 ? 1 : index === 0 ? 2 : 3;
-              return (
-                <div className={`scoreboard-podium-place scoreboard-podium-place-${rank}`} key={player.id || player.name}>
-                  <span className="scoreboard-podium-medal" aria-hidden="true">
-                    {rank === 1 ? '👑' : rank === 2 ? '🥈' : '🥉'}
-                  </span>
-                  <span className="scoreboard-podium-avatar" aria-hidden="true">
-                    <BlobAvatar avatarId={player.avatarId || getBlobAvatarId(player.id || player.name)} size={60} />
-                  </span>
-                  <strong className="scoreboard-podium-name">{player.name || 'Pemain'}</strong>
-                  <span className="scoreboard-podium-score">{Number(player.score) || 0} poin</span>
-                  <span className="scoreboard-podium-block">{rank === 1 ? '1' : rank}</span>
-                </div>
-              );
-            })}
-          </section>
-        )}
+        {ranking.length > 0 && (
+          <section className="scoreboard-chart" aria-labelledby="scoreboard-chart-title">
+            <div className="scoreboard-chart-heading">
+              <div>
+                <h2 id="scoreboard-chart-title">Perbandingan skor</h2>
+                <p>Batang lebih panjang berarti skor lebih tinggi.</p>
+              </div>
+              <span className="scoreboard-chart-max">Maks. {numberFormat.format(maxScore)} poin</span>
+            </div>
+            <ol className="scoreboard-chart-list">
+              {ranking.map((player, index) => {
+                const rank = index + 1;
+                const score = Math.max(0, Number(player.score) || 0);
+                const speedBonus = Math.max(0, Number(player.speedBonus) || 0);
+                const baseScore = Math.max(0, Number(player.baseScore) || (score - speedBonus));
+                const answeredQuestions = Math.max(0, Number(player.answeredQuestions) || 0);
+                const correctAnswers = Math.max(0, Number(player.correctAnswers) || 0);
 
-        {winner && (
-          <section className="scoreboard-winner" aria-label={`Juara satu: ${winner.name || 'Pemain'}`}>
-            <span className="scoreboard-winner-crown" aria-hidden="true">👑</span>
-            <span className="scoreboard-winner-avatar" aria-hidden="true">
-              <BlobAvatar avatarId={winner.avatarId || getBlobAvatarId(winner.id || winner.name)} size={78} />
-            </span>
-            <span className="scoreboard-winner-label">JUARA 1</span>
-            <strong className="scoreboard-winner-name">{winner.name || 'Pemain'}</strong>
-            <span className="scoreboard-winner-score">{Number(winner.score) || 0} poin</span>
-            {isDrawMode ? (
-              <span className="scoreboard-winner-breakdown">Poin dari tebakan yang benar</span>
-            ) : (
-              <span className="scoreboard-winner-breakdown">
-                {Number(winner.correctAnswers) || 0}/{TOTAL_QUESTIONS} benar
-                <span aria-hidden="true"> · </span>
-                +{Number(winner.speedBonus) || 0} poin cepat
-              </span>
-            )}
+                return (
+                  <li
+                    className={`scoreboard-chart-row${rank === 1 ? ' scoreboard-chart-row-first' : ''}`}
+                    key={player.id || `${player.name}-${rank}`}
+                  >
+                    <div className="scoreboard-chart-player">
+                      <span className="scoreboard-chart-rank" aria-label={`Peringkat ${rank}`}>
+                        {rank <= 3 ? ['🥇', '🥈', '🥉'][rank - 1] : rank}
+                      </span>
+                      <span className="scoreboard-chart-avatar" aria-hidden="true">
+                        <BlobAvatar
+                          avatarId={player.avatarId || getBlobAvatarId(player.id || player.name)}
+                          size={42}
+                        />
+                      </span>
+                      <span className="scoreboard-chart-name">
+                        <strong>{player.name || 'Pemain'}</strong>
+                        <small>{rank === 1 ? 'JUARA 1' : `JUARA ${rank}`}{player.isHost ? ' · HOST' : ''}</small>
+                      </span>
+                      <strong className="scoreboard-chart-score">
+                        {numberFormat.format(score)} <small>poin</small>
+                      </strong>
+                    </div>
+                    <div
+                      className="scoreboard-chart-track"
+                      role="progressbar"
+                      aria-label={`Skor ${player.name || 'Pemain'}`}
+                      aria-valuemin={0}
+                      aria-valuemax={maxScore}
+                      aria-valuenow={score}
+                      aria-valuetext={`${numberFormat.format(score)} dari ${numberFormat.format(maxScore)} poin`}
+                    >
+                      <span
+                        className="scoreboard-chart-bar"
+                        style={{ width: `${(score / maxScore) * 100}%` }}
+                      />
+                    </div>
+                    <div className="scoreboard-chart-details">
+                      {isDrawMode ? (
+                        <span>Poin kontribusi gambar & tebakan: {numberFormat.format(baseScore)}</span>
+                      ) : (
+                        <>
+                          <span>
+                            {correctAnswers}/{TOTAL_QUESTIONS} benar
+                            {answeredQuestions < TOTAL_QUESTIONS ? ` · ${answeredQuestions} dijawab` : ''}
+                          </span>
+                          <span>{numberFormat.format(baseScore)} poin dasar</span>
+                          <span>+{numberFormat.format(speedBonus)} poin cepat</span>
+                        </>
+                      )}
+                    </div>
+                  </li>
+                );
+              })}
+            </ol>
+            <div className="scoreboard-chart-scale" aria-hidden="true">
+              <span>0 poin</span>
+              <span>{numberFormat.format(maxScore)} poin</span>
+            </div>
           </section>
         )}
 
@@ -131,34 +165,6 @@ export default function ScoreboardPage({ roomName, players = [], reason, mode, o
             ))}
           </section>
         )}
-
-        <ol className="scoreboard-list" aria-label="Peringkat pemain">
-          {ranking.map((player, index) => {
-            const rank = index + 1;
-            const rankClass = podiumStyles[rank] || 'score-rank-default';
-
-            return (
-              <li className={`scoreboard-player ${rankClass}`} key={player.id || `${player.name}-${rank}`}>
-                <span className="scoreboard-rank" aria-label={`Juara ${rank}`}>
-                  {rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : rank}
-                </span>
-                <span className="scoreboard-player-avatar" aria-hidden="true">
-                  <BlobAvatar avatarId={player.avatarId || getBlobAvatarId(player.id || player.name)} size={42} />
-                </span>
-                <span className="scoreboard-player-info">
-                  <strong>{player.name || 'Pemain'}</strong>
-                  <small>{rank === 1 ? 'JUARA 1' : `JUARA ${rank}`}{player.isHost ? ' · HOST' : ''}</small>
-                  {!isDrawMode && (
-                    <small className="scoreboard-player-bonus">
-                      {Number(player.correctAnswers) || 0}/{TOTAL_QUESTIONS} benar · +{Number(player.speedBonus) || 0} poin cepat
-                    </small>
-                  )}
-                </span>
-                <span className="scoreboard-player-score">{Number(player.score) || 0}<small> POIN</small></span>
-              </li>
-            );
-          })}
-        </ol>
 
         {ranking.length === 0 && (
           <p className="scoreboard-empty">Belum ada data skor untuk ditampilkan.</p>
