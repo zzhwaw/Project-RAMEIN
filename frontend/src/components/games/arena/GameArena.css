@@ -172,6 +172,10 @@
   font-variant-numeric: tabular-nums;
 }
 
+.game-arena-body > .character-skill {
+  margin-bottom: 18px;
+}
+
 .mini-game-panel,
 .game-arena-card {
   width: min(100%, 680px);

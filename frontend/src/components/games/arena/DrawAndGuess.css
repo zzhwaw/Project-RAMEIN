@@ -115,6 +115,10 @@
   text-align: center;
 }
 
+.draw-game > .character-skill {
+  margin: 0 auto 16px;
+}
+
 .draw-word-card > span {
   color: #e84f91;
   font-size: 0.68rem;

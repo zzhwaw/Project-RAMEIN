@@ -2,6 +2,7 @@ import { useState } from 'react';
 import BlobAvatar from '../BlobAvatars';
 import { getBlobAvatarId } from '../blobAvatarUtils';
 import PlayerReactions from '../PlayerReactions';
+import { getCharacterSkill } from '../characterSkills';
 
 const cardColors = ['card-pink', 'card-blue', 'card-yellow', 'card-red', 'card-green', 'card-black'];
 const gameModes = [
@@ -173,6 +174,11 @@ export default function LobbyPage({
               <div className="player-name-badge" title={player?.name || 'Menunggu pemain'}>
                 {player?.name || 'Menunggu...'}
               </div>
+              {player && (
+                <span className="lobby-player-skill" title={getCharacterSkill(player.avatarId).description}>
+                  {getCharacterSkill(player.avatarId).icon} {getCharacterSkill(player.avatarId).name}
+                </span>
+              )}
             </div>
           );
         })}

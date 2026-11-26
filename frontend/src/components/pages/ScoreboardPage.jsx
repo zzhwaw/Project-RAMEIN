@@ -86,7 +86,11 @@ export default function ScoreboardPage({ roomName, players = [], reason, mode, o
                 const rank = index + 1;
                 const score = Math.max(0, Number(player.score) || 0);
                 const speedBonus = Math.max(0, Number(player.speedBonus) || 0);
-                const baseScore = Math.max(0, Number(player.baseScore) || (score - speedBonus));
+                const recordedBaseScore = Number(player.baseScore);
+                const baseScore = Number.isFinite(recordedBaseScore)
+                  ? Math.max(0, recordedBaseScore)
+                  : Math.max(0, score - speedBonus);
+                const skillAdjustment = Number(player.skillScore) || 0;
                 const answeredQuestions = Math.max(0, Number(player.answeredQuestions) || 0);
                 const correctAnswers = Math.max(0, Number(player.correctAnswers) || 0);
 
@@ -129,7 +133,14 @@ export default function ScoreboardPage({ roomName, players = [], reason, mode, o
                     </div>
                     <div className="scoreboard-chart-details">
                       {isDrawMode ? (
-                        <span>Poin kontribusi gambar & tebakan: {numberFormat.format(baseScore)}</span>
+                        <>
+                          <span>Poin kontribusi gambar & tebakan: {numberFormat.format(baseScore)}</span>
+                          {skillAdjustment !== 0 && (
+                            <span>
+                              {skillAdjustment > 0 ? '+' : ''}{numberFormat.format(skillAdjustment)} poin dari skill
+                            </span>
+                          )}
+                        </>
                       ) : (
                         <>
                           <span>
@@ -138,6 +149,11 @@ export default function ScoreboardPage({ roomName, players = [], reason, mode, o
                           </span>
                           <span>{numberFormat.format(baseScore)} poin dasar</span>
                           <span>+{numberFormat.format(speedBonus)} poin cepat</span>
+                          {skillAdjustment !== 0 && (
+                            <span>
+                              {skillAdjustment > 0 ? '+' : ''}{numberFormat.format(skillAdjustment)} poin dari skill
+                            </span>
+                          )}
                         </>
                       )}
                     </div>
