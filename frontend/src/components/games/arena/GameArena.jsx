@@ -3,6 +3,7 @@ import './GameArena.css';
 import BlobAvatar, { BlobAvatarScene } from '../../BlobAvatars';
 import { getBlobAvatarId } from '../../blobAvatarUtils';
 import PlayerReactions from '../../PlayerReactions';
+import CharacterSkill from '../../CharacterSkill';
 import {
   MenghitungCepatQuiz,
   TebakGambarQuiz,
@@ -28,7 +29,9 @@ export default function GameArena({
   onProgress,
   players = [],
   currentPlayerId,
+  currentPlayer,
   score = 0,
+  onUseSkill,
   onReact,
   reactionError,
 }) {
@@ -134,6 +137,15 @@ export default function GameArena({
                 </div>
               ))}
           </section>
+        )}
+        {currentPlayer && (
+          <CharacterSkill
+            player={currentPlayer}
+            players={players}
+            roundId={roundId}
+            onUseSkill={onUseSkill}
+            disabled={Boolean(visibleResult) || !Number.isFinite(timeLeft) || timeLeft <= 0}
+          />
         )}
         {!visibleResult && (
           <GameComponent

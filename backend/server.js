@@ -36,6 +36,16 @@ const SPEED_BONUS_WINDOW_MS = 5_000;
 const PLAYER_AVATAR_COUNT = 8;
 const REACTION_COOLDOWN_MS = 1_000;
 const PLAYER_REACTIONS = ['👏', '😂', '🔥', '💖', '😱', '🎉'];
+const CHARACTER_SKILLS = {
+  1: { name: 'Ledakan Panik', timePenaltyMs: 8_000 },
+  2: { name: 'Kabut Bingung', pointLoss: 60 },
+  3: { name: 'Curi Poin', stealPoints: 50 },
+  4: { name: 'Jebakan Lendir', speedDrain: 50, fallbackLoss: 50 },
+  5: { name: 'Teriakan Keras', timePenaltyMs: 5_000, pointLoss: 25 },
+  6: { name: 'Tatapan Sinis', speedDrain: 100, fallbackLoss: 60 },
+  7: { name: 'Panik Memanjang', timePenaltyMs: 4_000, stealPercent: 0.25, stealCap: 60 },
+  8: { name: 'Kacaukan Fokus', blockSpeedQuestions: 3, fallbackLoss: 45 },
+};
 const DRAW_WORDS = [
   'Sapi', 'Sepeda', 'Pohon', 'Pesawat', 'Pelangi', 'Kucing', 'Bintang', 'Es krim',
   'Pisang', 'Gitar', 'Payung', 'Kapal', 'Kacamata', 'Kupu-kupu', 'Gunung', 'Roket',
@@ -86,6 +96,70 @@ function calculateSpeedBonus(answerTimeMs) {
   return Math.round(MAX_SPEED_BONUS * speedRatio);
 }
 
+function updatePlayerScore(player) {
+  player.score = Math.max(0, player.baseScore + player.speedBonus + player.skillScore);
+}
+
+function subtractPlayerPoints(player, requestedPoints) {
+  const points = Math.min(Math.max(0, player.score), requestedPoints);
+  player.skillScore -= points;
+  updatePlayerScore(player);
+  return points;
+}
+
+function applyCharacterSkill(room, player, target) {
+  const skill = CHARACTER_SKILLS[player.avatarId] || CHARACTER_SKILLS[1];
+  const now = Date.now();
+  const effect = {
+    timePenaltyMs: 0,
+    pointsLost: 0,
+    pointsStolen: 0,
+    speedBonusLost: 0,
+    speedBonusBlocked: 0,
+  };
+
+  if (skill.timePenaltyMs) {
+    target.timeEndsAt = Math.max(now, target.timeEndsAt - skill.timePenaltyMs);
+    effect.timePenaltyMs = skill.timePenaltyMs;
+    if (room.game.activeMode === DRAW_MODE
+      && room.drawGame?.drawerId === target.id
+      && target.timeEndsAt < room.drawGame.turnEndsAt) {
+      clearTimeout(room.drawGame.turnTimeout);
+      room.drawGame.turnTimeout = setTimeout(
+        () => beginDrawTurn(room),
+        Math.max(0, target.timeEndsAt - now),
+      );
+    }
+  }
+  if (skill.speedDrain) {
+    effect.speedBonusLost = Math.min(target.speedBonus, skill.speedDrain);
+    target.speedBonus -= effect.speedBonusLost;
+    updatePlayerScore(target);
+    effect.pointsLost += effect.speedBonusLost;
+    if (effect.speedBonusLost === 0) {
+      effect.pointsLost += subtractPlayerPoints(target, skill.fallbackLoss);
+    }
+  } else if (skill.pointLoss) {
+    effect.pointsLost = subtractPlayerPoints(target, skill.pointLoss);
+  } else if (skill.stealPoints || skill.stealPercent) {
+    const requestedPoints = skill.stealPercent
+      ? Math.min(skill.stealCap, Math.floor(target.score * skill.stealPercent))
+      : skill.stealPoints;
+    effect.pointsStolen = subtractPlayerPoints(target, requestedPoints);
+    player.skillScore += effect.pointsStolen;
+    updatePlayerScore(player);
+  } else if (skill.blockSpeedQuestions) {
+    if (room.game.activeMode === DRAW_MODE) {
+      effect.pointsLost = subtractPlayerPoints(target, skill.fallbackLoss);
+    } else {
+      target.blockedSpeedQuestions = skill.blockSpeedQuestions;
+      effect.speedBonusBlocked = skill.blockSpeedQuestions;
+    }
+  }
+
+  return { skill, effect };
+}
+
 function getDrawTurn(room) {
   const drawGame = room.drawGame;
   if (!drawGame?.drawerId) return null;
@@ -121,12 +195,15 @@ function beginDrawTurn(room) {
     const orderIndex = (drawGame.startingIndex + drawGame.turnNumber + offset) % orderLength;
     const candidateId = drawGame.drawOrder[orderIndex];
     if (room.players.has(candidateId)) {
-      drawerId = candidateId;
-      break;
+      const candidate = room.players.get(candidateId);
+      if (candidate.timeEndsAt > Date.now()) {
+        drawerId = candidateId;
+        break;
+      }
     }
   }
   if (!drawerId) {
-    finishGame(room, 'all-players-left');
+    finishGame(room, 'all-players-finished');
     return;
   }
 
@@ -258,6 +335,9 @@ io.on('connection', (socket) => {
       score: 0,
       baseScore: 0,
       speedBonus: 0,
+      skillScore: 0,
+      skillUsed: false,
+      blockedSpeedQuestions: 0,
       answered: false,
       correctAnswers: 0,
       answeredQuestions: 0,
@@ -318,6 +398,9 @@ io.on('connection', (socket) => {
       score: 0,
       baseScore: 0,
       speedBonus: 0,
+      skillScore: 0,
+      skillUsed: false,
+      blockedSpeedQuestions: 0,
       answered: false,
       correctAnswers: 0,
       answeredQuestions: 0,
@@ -413,6 +496,53 @@ io.on('connection', (socket) => {
     callback({ ok: true });
   });
 
+  socket.on('player:skill-use', (payload = {}, callback = () => {}) => {
+    const room = rooms.get(socket.data.roomId);
+    const player = room?.players.get(socket.id);
+    const target = room?.players.get(payload.targetId);
+    if (!room || room.phase !== 'playing' || !player || !room.game) {
+      callback({ error: 'Skill hanya bisa dipakai saat game berlangsung.' });
+      return;
+    }
+    if (payload.roundId !== room.game.roundId) {
+      callback({ error: 'Ronde ini sudah tidak aktif.' });
+      return;
+    }
+    if (Date.now() < room.game.playStartsAt) {
+      callback({ error: 'Tunggu sampai pengundian mode selesai.' });
+      return;
+    }
+    if (player.answered || Date.now() >= player.timeEndsAt) {
+      callback({ error: 'Kamu sudah menyelesaikan ronde ini.' });
+      return;
+    }
+    if (player.skillUsed) {
+      callback({ error: 'Skill karaktermu sudah dipakai pada game ini.' });
+      return;
+    }
+    if (!target || target.id === player.id || target.answered || Date.now() >= target.timeEndsAt) {
+      callback({ error: 'Pilih lawan yang masih bermain.' });
+      return;
+    }
+
+    player.skillUsed = true;
+    const { skill, effect } = applyCharacterSkill(room, player, target);
+    const notice = {
+      id: `${Date.now()}-${socket.id}`,
+      roundId: room.game.roundId,
+      actorId: player.id,
+      actorName: player.name,
+      targetId: target.id,
+      targetName: target.name,
+      avatarId: player.avatarId,
+      skillName: skill.name,
+      effect,
+    };
+    broadcastRoom(room);
+    io.to(room.id).emit('player:skill-used', notice);
+    callback({ ok: true });
+  });
+
   socket.on('game:start', (payload = {}, callback = () => {}) => {
     const room = rooms.get(socket.data.roomId);
     if (!room || !room.players.has(socket.id)) {
@@ -477,10 +607,14 @@ io.on('connection', (socket) => {
       player.score = 0;
       player.baseScore = 0;
       player.speedBonus = 0;
+      player.skillScore = 0;
+      player.skillUsed = false;
+      player.blockedSpeedQuestions = 0;
       player.answered = false;
       player.correctAnswers = 0;
       player.answeredQuestions = 0;
       player.lastAnswerAt = room.game.playStartsAt;
+      player.timeEndsAt = room.game.endsAt;
     });
 
     const game = { ...room.game };
@@ -530,6 +664,7 @@ io.on('connection', (socket) => {
       || payload.roundId !== drawGame.roundId
       || payload.turnNumber !== drawGame.turnNumber
       || Date.now() >= drawGame.turnEndsAt
+      || Date.now() >= room.players.get(socket.id)?.timeEndsAt
       || drawGame.solved) {
       callback({ error: 'Garis tidak sesuai dengan giliran aktif.' });
       return;
@@ -573,6 +708,7 @@ io.on('connection', (socket) => {
       || payload.roundId !== drawGame.roundId
       || payload.turnNumber !== drawGame.turnNumber
       || Date.now() >= drawGame.turnEndsAt
+      || Date.now() >= room.players.get(socket.id)?.timeEndsAt
       || drawGame.solved) {
       callback({ error: 'Canvas hanya dapat dibersihkan oleh penggambar aktif.' });
       return;
@@ -594,7 +730,8 @@ io.on('connection', (socket) => {
       || !drawGame.drawerId
       || !drawGame.currentWord
       || payload.turnNumber !== drawGame.turnNumber
-      || Date.now() >= drawGame.turnEndsAt) {
+      || Date.now() >= drawGame.turnEndsAt
+      || Date.now() >= player.timeEndsAt) {
       callback({ error: 'Giliran menebak ini sudah berakhir.' });
       return;
     }
@@ -681,6 +818,10 @@ io.on('connection', (socket) => {
       callback({ error: 'Tunggu sampai pengundian mode selesai.' });
       return;
     }
+    if (Date.now() >= player.timeEndsAt) {
+      callback({ error: 'Waktu permainanmu sudah habis.' });
+      return;
+    }
     if (payload.roundId !== room.game.roundId || player.answered) {
       callback({ error: 'Progress ini bukan untuk ronde aktif.' });
       return;
@@ -695,14 +836,16 @@ io.on('connection', (socket) => {
 
     const now = Date.now();
     const correctAnswerDelta = payload.correctAnswers - player.correctAnswers;
-    const questionSpeedBonus = correctAnswerDelta
+    const isSpeedBonusBlocked = player.blockedSpeedQuestions > 0;
+    const questionSpeedBonus = correctAnswerDelta && !isSpeedBonusBlocked
       ? calculateSpeedBonus(now - player.lastAnswerAt)
       : 0;
     player.correctAnswers = payload.correctAnswers;
     player.answeredQuestions = payload.answeredQuestions;
     player.baseScore += correctAnswerDelta * QUESTION_BASE_POINTS;
     player.speedBonus += questionSpeedBonus;
-    player.score = player.baseScore + player.speedBonus;
+    if (player.blockedSpeedQuestions > 0) player.blockedSpeedQuestions -= 1;
+    updatePlayerScore(player);
     player.lastAnswerAt = now;
     broadcastRoom(room);
     callback({
@@ -738,15 +881,15 @@ io.on('connection', (socket) => {
       callback({ error: 'Tunggu sampai pengundian mode selesai.' });
       return;
     }
+    if (Date.now() < player.timeEndsAt && payload.answeredQuestions !== room.game.totalQuestions) {
+      callback({ error: `Selesaikan semua ${room.game.totalQuestions} soal sebelum mengirim skor akhir.` });
+      return;
+    }
 
     if (!isValidQuestionProgress(payload, room.game.totalQuestions)
       || payload.answeredQuestions !== player.answeredQuestions
       || payload.correctAnswers !== player.correctAnswers) {
       callback({ error: 'Progress jawaban tidak valid.' });
-      return;
-    }
-    if (Date.now() < room.game.endsAt && payload.answeredQuestions !== room.game.totalQuestions) {
-      callback({ error: `Selesaikan semua ${room.game.totalQuestions} soal sebelum mengirim skor akhir.` });
       return;
     }
     player.correctAnswers = payload.correctAnswers;

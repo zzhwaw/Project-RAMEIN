@@ -3,6 +3,7 @@ import './DrawAndGuess.css';
 import BlobAvatar, { BlobAvatarScene } from '../../BlobAvatars';
 import { getBlobAvatarId } from '../../blobAvatarUtils';
 import PlayerReactions from '../../PlayerReactions';
+import CharacterSkill from '../../CharacterSkill';
 
 const COLORS = ['#292536', '#ef476f', '#ff9f1c', '#ffd166', '#06a77d', '#168aad', '#4361ee', '#9b5de5'];
 const MIN_TOOL_SIZE = 1;
@@ -34,6 +35,8 @@ export default function DrawAndGuess({
   timeLeft,
   players = [],
   currentPlayerId,
+  currentPlayer,
+  onUseSkill,
   onReact,
   reactionError,
 }) {
@@ -53,6 +56,7 @@ export default function DrawAndGuess({
   const [solved, setSolved] = useState(false);
   const [error, setError] = useState('');
   const [turnTimeLeft, setTurnTimeLeft] = useState(60);
+  const hasGameTime = Number.isFinite(timeLeft) && timeLeft > 0;
 
   const drawSegment = useCallback((segment) => {
     const canvas = canvasRef.current;
@@ -160,7 +164,7 @@ export default function DrawAndGuess({
   };
 
   const startDrawing = (event) => {
-    if (!isDrawer || solved || !canvasRef.current) return;
+    if (!isDrawer || solved || !hasGameTime || !canvasRef.current) return;
     event.preventDefault();
     event.currentTarget.setPointerCapture(event.pointerId);
     lastPointRef.current = getCanvasPoint(event);
@@ -168,7 +172,7 @@ export default function DrawAndGuess({
   };
 
   const draw = (event) => {
-    if (!isDrawingRef.current || !lastPointRef.current || !isDrawer || solved) return;
+    if (!isDrawingRef.current || !lastPointRef.current || !isDrawer || solved || !hasGameTime) return;
     const point = getCanvasPoint(event);
     const previousPoint = lastPointRef.current;
     const segment = {
@@ -207,7 +211,7 @@ export default function DrawAndGuess({
   };
 
   const handleClearCanvas = () => {
-    if (!isDrawer || solved) return;
+    if (!isDrawer || solved || !hasGameTime) return;
     clearCanvas();
     socket.emit('draw:clear', { roundId: game.roundId, turnNumber: turn.turnNumber }, (response) => {
       if (response?.error) setError(response.error);
@@ -217,7 +221,7 @@ export default function DrawAndGuess({
   const submitGuess = (event) => {
     event.preventDefault();
     const text = guess.trim();
-    if (!text || isDrawer || solved || !turn) return;
+    if (!text || isDrawer || solved || !turn || !hasGameTime) return;
     setError('');
     socket.emit('draw:guess', {
       roundId: game.roundId,
@@ -249,6 +253,16 @@ export default function DrawAndGuess({
         </div>
       </header>
 
+      {currentPlayer && (
+        <CharacterSkill
+          player={currentPlayer}
+          players={players}
+          roundId={game.roundId}
+          onUseSkill={onUseSkill}
+          disabled={!hasGameTime}
+        />
+      )}
+
       <section className="draw-word-card" aria-live="polite">
         <span>{isDrawer ? 'KATA RAHASIA' : 'TEBAK KATA INI'}</span>
         <strong>{isDrawer ? (word || 'Menyiapkan kata...') : (solved ? word : maskedWord)}</strong>
@@ -275,7 +289,7 @@ export default function DrawAndGuess({
               onPointerCancel={stopDrawing}
               onLostPointerCapture={stopDrawing}
             />
-            {isDrawer && !solved && cursor && (
+            {isDrawer && !solved && hasGameTime && cursor && (
               <span
                 className={`draw-canvas-cursor${isEraser ? ' draw-canvas-cursor-eraser' : ''}`}
                 style={{
@@ -289,7 +303,7 @@ export default function DrawAndGuess({
               />
             )}
           </div>
-          {isDrawer && (
+          {isDrawer && hasGameTime && (
             <div className="draw-toolbar" aria-label="Alat menggambar">
               <label className={`draw-size-control${!isEraser ? ' draw-size-control-active' : ''}`}>
                 <span>✏️ Kuas <output>{brushSize}</output></span>
@@ -384,9 +398,9 @@ export default function DrawAndGuess({
               value={guess}
               onChange={(event) => setGuess(event.target.value)}
               placeholder={isDrawer ? 'Kamu sedang menggambar...' : 'Tulis tebakanmu...'}
-              disabled={isDrawer || solved || !turn}
+              disabled={isDrawer || solved || !turn || !hasGameTime}
             />
-            <button type="submit" disabled={isDrawer || solved || !guess.trim() || !turn}>
+            <button type="submit" disabled={isDrawer || solved || !guess.trim() || !turn || !hasGameTime}>
               KIRIM
             </button>
           </form>

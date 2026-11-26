@@ -1019,6 +1019,21 @@ body {
   white-space: nowrap;
 }
 
+.lobby-player-skill {
+  max-width: 100%;
+  margin-top: 20px;
+  padding: 5px 8px;
+  border: 2px solid #2a2a2a;
+  border-radius: 10px;
+  background: #fff8d8;
+  color: #2a2a2a;
+  font-size: clamp(0.58rem, 1vw, 0.72rem);
+  font-weight: 900;
+  line-height: 1.2;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
 .player-card-empty .player-name-badge {
   background: #d7d4d0;
   color: #fff;

@@ -10,6 +10,7 @@ import GameArena from './components/games/arena/GameArena';
 import DrawAndGuess from './components/games/arena/DrawAndGuess';
 import ModeReveal from './components/games/arena/ModeReveal';
 import { ReactionFeed } from './components/PlayerReactions';
+import { getCharacterSkill } from './components/characterSkills';
 
 const PAGE_TRANSITION_MS = 700;
 
@@ -21,6 +22,7 @@ export default function App() {
   const [finalStandings, setFinalStandings] = useState(null);
   const [timeLeft, setTimeLeft] = useState(0);
   const [reactions, setReactions] = useState([]);
+  const [skillNotices, setSkillNotices] = useState([]);
   const [reactionError, setReactionError] = useState('');
   const [lobbyOrigin, setLobbyOrigin] = useState('create');
   const [socket] = useState(() => io(import.meta.env.VITE_SOCKET_URL || 'http://localhost:3001', {
@@ -28,9 +30,11 @@ export default function App() {
   }));
   const navigationTimeout = useRef(null);
   const reactionTimeouts = useRef(new Map());
+  const skillTimeouts = useRef(new Map());
 
   useEffect(() => {
     const reactionTimers = reactionTimeouts.current;
+    const skillTimers = skillTimeouts.current;
     const handleRoomUpdate = (updatedRoom) => setRoom(updatedRoom);
     const handlePlayerReaction = (reaction) => {
       setReactions((current) => [...current, reaction].slice(-4));
@@ -39,6 +43,40 @@ export default function App() {
         reactionTimeouts.current.delete(reaction.id);
       }, 3500);
       reactionTimeouts.current.set(reaction.id, timeoutId);
+    };
+    const handlePlayerSkill = (notice) => {
+      const effectDetails = [];
+      if (notice.effect.timePenaltyMs) {
+        effectDetails.push(`-${Math.ceil(notice.effect.timePenaltyMs / 1000)} dtk`);
+      }
+      if (notice.effect.speedBonusLost) {
+        effectDetails.push(`-${notice.effect.speedBonusLost} bonus kecepatan`);
+      }
+      const directPointsLost = notice.effect.pointsLost - notice.effect.speedBonusLost;
+      if (directPointsLost > 0) effectDetails.push(`-${directPointsLost} poin`);
+      if (notice.effect.pointsStolen) effectDetails.push(`+${notice.effect.pointsStolen} poin dicuri`);
+      if (notice.effect.speedBonusBlocked) {
+        effectDetails.push(`bonus kecepatan diblokir ${notice.effect.speedBonusBlocked} soal`);
+      }
+      const isTarget = notice.targetId === socket.id;
+      const isActor = notice.actorId === socket.id;
+      const skill = getCharacterSkill(notice.avatarId);
+      const message = isTarget
+        ? `${notice.actorName} memakai ${skill.name} padamu!`
+        : isActor
+          ? `Skill ${skill.name} berhasil dipakai pada ${notice.targetName}.`
+          : `${notice.actorName} memakai ${skill.name} pada ${notice.targetName}.`;
+      const entry = {
+        ...notice,
+        message,
+        details: effectDetails.join(' • ') || 'Efek skill diterapkan',
+      };
+      setSkillNotices((current) => [...current, entry].slice(-3));
+      const timeoutId = window.setTimeout(() => {
+        setSkillNotices((current) => current.filter((item) => item.id !== notice.id));
+        skillTimers.delete(notice.id);
+      }, 4500);
+      skillTimers.set(notice.id, timeoutId);
     };
     const handleGameStarted = (startedGame) => {
       const synchronizedGame = {
@@ -65,6 +103,7 @@ export default function App() {
 
     socket.on('room:updated', handleRoomUpdate);
     socket.on('player:reaction', handlePlayerReaction);
+    socket.on('player:skill-used', handlePlayerSkill);
     socket.on('game:started', handleGameStarted);
     socket.on('game:ended', handleGameEnded);
 
@@ -72,8 +111,11 @@ export default function App() {
       window.clearTimeout(navigationTimeout.current);
       reactionTimers.forEach((timeoutId) => window.clearTimeout(timeoutId));
       reactionTimers.clear();
+      skillTimers.forEach((timeoutId) => window.clearTimeout(timeoutId));
+      skillTimers.clear();
       socket.off('room:updated', handleRoomUpdate);
       socket.off('player:reaction', handlePlayerReaction);
+      socket.off('player:skill-used', handlePlayerSkill);
       socket.off('game:started', handleGameStarted);
       socket.off('game:ended', handleGameEnded);
       socket.disconnect();
@@ -86,12 +128,14 @@ export default function App() {
     const updateTimeLeft = () => {
       const clientNow = Date.now() + game.clientClockOffset;
       const playStartsAt = game.playStartsAt || game.startedAt;
-      setTimeLeft(Math.max(0, (game.endsAt - Math.max(clientNow, playStartsAt)) / 1000));
+      const ownDeadline = room?.players.find((player) => player.id === socket.id)?.timeEndsAt;
+      const deadline = Number.isFinite(ownDeadline) ? Math.min(game.endsAt, ownDeadline) : game.endsAt;
+      setTimeLeft(Math.max(0, (deadline - Math.max(clientNow, playStartsAt)) / 1000));
     };
     updateTimeLeft();
     const timerId = window.setInterval(updateTimeLeft, 100);
     return () => window.clearInterval(timerId);
-  }, [game]);
+  }, [game, room, socket]);
 
   const requestRoom = (eventName, payload) => new Promise((resolve) => {
     let completed = false;
@@ -149,6 +193,10 @@ export default function App() {
   const handleSetReady = (ready) => requestRoom('player:ready', { ready });
   const handleUpdateRoomSettings = (settings) => requestRoom('room:update-settings', settings);
   const handleStartGame = () => requestRoom('game:start', {});
+  const handleUseCharacterSkill = (targetId, roundId) => requestRoom(
+    'player:skill-use',
+    { targetId, roundId },
+  );
   const handleSendReaction = (emoji) => {
     setReactionError('');
     socket.timeout(4000).emit('player:reaction', { emoji }, (error, result) => {
@@ -269,6 +317,9 @@ export default function App() {
             timeLeft={timeLeft}
             players={room?.players || []}
             currentPlayerId={socket.id}
+            currentPlayer={room?.players.find((player) => player.id === socket.id)}
+            roundId={game.roundId}
+            onUseSkill={handleUseCharacterSkill}
             onReact={handleSendReaction}
             reactionError={reactionError}
           />
@@ -282,7 +333,9 @@ export default function App() {
             timeLeft={timeLeft}
             players={room?.players || []}
             currentPlayerId={socket.id}
+            currentPlayer={room?.players.find((player) => player.id === socket.id)}
             score={room?.players.find((player) => player.id === socket.id)?.score || 0}
+            onUseSkill={handleUseCharacterSkill}
             onReact={handleSendReaction}
             reactionError={reactionError}
             onAnswer={handleGameAnswer}
@@ -300,6 +353,16 @@ export default function App() {
         />
       )}
       <ReactionFeed reactions={reactions} />
+      {skillNotices.length > 0 && (
+        <div className="character-skill-notices" aria-live="polite">
+          {skillNotices.map((notice) => (
+            <div className="character-skill-notice" key={notice.id}>
+              <strong>{notice.message}</strong>
+              <span>{notice.details}</span>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
